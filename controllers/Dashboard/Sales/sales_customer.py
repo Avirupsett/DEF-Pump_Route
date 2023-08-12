@@ -124,7 +124,7 @@ def total_sales_based_on_customer(office_id,is_admin,from_date,to_date,cnxn):
 
     elif is_admin==4:
         df=godown_list(office_id,from_date,to_date,-1,cnxn)
-        df=df[~((df1["officeType"]!="Company")& (df["masterOfficeId"].str.lower()==office_id.lower()))]
+        df=df[~((df["officeType"]!="Company")& (df["masterOfficeId"].str.lower()==office_id.lower()))]
         sales_based_on_customer=total_sales_based_on_customer_body(df)
 
     elif is_admin==5:

@@ -183,9 +183,9 @@ def sales_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     is_admin = int(_IsAdmin)
 
     cnxn = pyodbc.connect(ConnectionString)
-    df,product_type_list,sales_based_on_office = sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn)
+    Sales_Expense_df,product_type_list,sales_based_on_office,sales_based_on_customer = sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn)
     cnxn.close()
-    return jsonify({"graph1":df,"graph2":product_type_list,"graph3":sales_based_on_office})
+    return jsonify({"graph1":Sales_Expense_df,"graph2":product_type_list,"graph3":sales_based_on_office,"graph4":sales_based_on_customer})
 
 @route_page.route("/api/v1/dashboard/sales_customer/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET"])
 def sales_customer(_FromDate,_ToDate,_OfficeId,_IsAdmin):
