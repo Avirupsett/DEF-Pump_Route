@@ -169,6 +169,59 @@
           }
         }
      },
+      "/api/v1/dashboard/sales_customer/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+        
+        "get": {
+          "tags": [
+            "Dashboard"
+          ],
+          "summary": "Get Sales By Customer (Name,VehicleNo,MobileNo)",
+          "parameters": [
+            {
+              "name": "FromDate",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"2023-07-01"
+              }
+            },
+            {
+              "name": "ToDate",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"2023-07-30"
+              }
+            },
+            {
+              "name": "OfficeId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"D5355D33-02CF-40B0-5246-08DA286D7F4A"
+              }
+            },
+            {
+              "name": "IsAdmin",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"number",
+                 "example":6
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+             
+            }
+          }
+        }
+     },
       "/api/v1/dashboard/payment/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
         
         "get": {
