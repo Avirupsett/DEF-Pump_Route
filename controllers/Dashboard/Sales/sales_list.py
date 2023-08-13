@@ -320,10 +320,12 @@ def sales_based_on_admin_body(date_range,df1,df2):
     for i in date_range:
         income=df1[df1["incomeDate"]==i]["totalIncome"].sum()
         expense=df2[df2["expenseDate"]==i]["totalExpense"].sum()
+        Product_list=pd.DataFrame()
         try:
-            Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
+            if not (df1["incomeDate"]==i).empty:
+                Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
         except:
-            Product_list=pd.DataFrame()
+            print("No Product")
         # try:
         #     Sales_list=df1[(df1["incomeDate"]==i)].groupby(["officeId"]).agg({"totalIncome":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalIncome"]]
         # except:
