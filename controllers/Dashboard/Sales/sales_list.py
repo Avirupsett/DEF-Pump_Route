@@ -46,6 +46,7 @@ def godown_list(office_id,from_date,to_date,level,cnxn):
 )
 
 SELECT
+    ct.IsActive,
     ct.MasterOfficeId As masterOfficeId,
     ct.MasterOfficeName As masterOfficeName,
     ct.OfficeId As officeId,
@@ -86,7 +87,7 @@ ProductType PT ON FR.ProductTypeId=PT.ProductTypeId
 Left join
 UnitMaster UM ON PT.PrimaryUnitId=UM.UnitId
 WHERE
-    ({level} < 0 OR ct.Level <= {level})
+    ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level})
     ''',cnxn)
     Expense_df2=pd.read_sql_query(f'''
    WITH cte_org AS (
@@ -133,6 +134,7 @@ WHERE
 )
 
 SELECT
+    ct.IsActive,
     ct.MasterOfficeId As masterOfficeId,
     ct.OfficeId As officeId,
     ct.OfficeName As officeName,
@@ -155,7 +157,7 @@ officeId, VoucherDate
 )E On ct.officeId=E.OfficeId
 
 WHERE
-    ({level} < 0 OR ct.Level <= {level})
+   ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level})
     ''',cnxn)
     Customer_df3=pd.read_sql_query(f'''
     WITH cte_org AS (
@@ -203,6 +205,7 @@ WHERE
 
 
 SELECT
+    ct.IsActive,
     ct.MasterOfficeId As masterOfficeId,
     ct.MasterOfficeName As masterOfficeName,
     ct.OfficeId As officeId,
@@ -229,7 +232,7 @@ InvoiceDate>='{from_date}' AND InvoiceDate<='{to_date}') S
 On ct.officeId=S.OfficeId 
 
 WHERE
-    ({level} < 0 OR ct.Level <= {level})
+   ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level})
     ''',cnxn)
     return Sales_df1,Expense_df2,Customer_df3
 
@@ -321,18 +324,18 @@ def sales_based_on_admin_body(date_range,df1,df2):
             Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
         except:
             Product_list=pd.DataFrame()
-        try:
-            Sales_list=df1[(df1["incomeDate"]==i)].groupby(["officeId"]).agg({"totalIncome":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalIncome"]]
-        except:
-            Sales_list=pd.DataFrame()
-        try:
-            Expense_list=df2[(df2["expenseDate"]==i)].groupby(["officeId"]).agg({"totalExpense":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalExpense"]]
-        except:
-            Expense_list=pd.DataFrame()
-        try:
-            Merged_list=pd.merge(Sales_list,Expense_list,on=["officeId","officeName","officeType"],how="outer").fillna(0)
-        except:
-            Merged_list=pd.DataFrame()
+        # try:
+        #     Sales_list=df1[(df1["incomeDate"]==i)].groupby(["officeId"]).agg({"totalIncome":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalIncome"]]
+        # except:
+        #     Sales_list=pd.DataFrame()
+        # try:
+        #     Expense_list=df2[(df2["expenseDate"]==i)].groupby(["officeId"]).agg({"totalExpense":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalExpense"]]
+        # except:
+        #     Expense_list=pd.DataFrame()
+        # try:
+        #     Merged_list=pd.merge(Sales_list,Expense_list,on=["officeId","officeName","officeType"],how="outer").fillna(0)
+        # except:
+        #     Merged_list=pd.DataFrame()
         try:
             Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
             Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
@@ -343,7 +346,7 @@ def sales_based_on_admin_body(date_range,df1,df2):
             "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),
             "totalIncome": income,
             "totalExpense": expense,
-            "lstOffice":Merged_list.to_dict(orient="records")
+            # "lstOffice":Merged_list.to_dict(orient="records")
         })
         productdata.append({
             "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),

@@ -30,7 +30,7 @@ def Extracting( Product_Type,cnxn):
         gm.totalCapacity,
         s.avgSales
     FROM
-        Office o
+        (Select * from Office Where IsActive=1) o
     LEFT JOIN
         CurrentStockDetails cs ON o.OfficeId = cs.OfficeId
     LEFT JOIN
@@ -53,7 +53,7 @@ su.OfficeId
             FROM
                 Sales
             WHERE
-                Total > 0
+                Total > 0 AND IsDeleted=0
             GROUP BY
                 OfficeId
         ) s ON o.OfficeId = s.OfficeId
@@ -135,7 +135,7 @@ def ExtractingFromOfficeId( Product_Type, OfficeList,cnxn,No_of_days_for_deliver
     gm.totalCapacity,
     s.avgSales
 FROM
-    Office o
+    (Select * from Office Where IsActive=1) o
 LEFT JOIN
     CurrentStockDetails cs ON o.OfficeId = cs.OfficeId
 
@@ -159,7 +159,7 @@ LEFT JOIN
         FROM
             Sales
         WHERE
-            Total > 0
+            Total > 0 AND isDeleted=0
         GROUP BY
             OfficeId
     ) s ON o.OfficeId = s.OfficeId

@@ -59,7 +59,7 @@ def dropdown_list(user_id,cnxn):
     FROM cte_org ct
     LEFT OUTER JOIN OfficeType ot ON ct.OfficeTypeId = ot.OfficeTypeId
     WHERE
-        (1 < 0 OR ct.Level <= 1)
+      ct.IsActive=1 and  (1 < 0 OR ct.Level <= 1)
     ORDER BY
         ct.Level;
     ''',cnxn)

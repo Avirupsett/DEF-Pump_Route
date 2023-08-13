@@ -48,6 +48,7 @@ WITH cte_org AS (
 )
 
 SELECT
+    ct.IsActive,
     ct.Level as level,
     ct.MasterOfficeId As masterOfficeId,
     ct.OfficeId As officeId,
@@ -67,6 +68,7 @@ Left Outer join
 Select SUM(Total) As totalIncome,Count(Total) As incomeCount,OfficeId
 From Sales
 Where
+IsDeleted=0 And
 InvoiceDate>='{from_date}' AND InvoiceDate<='{to_date}'
 Group By
 OfficeId
@@ -92,7 +94,7 @@ Left Join
 AspNetRoles ANR ON ANR.Id=ANUR.RoleId
 
 WHERE
-    ({level} < 0 OR ct.Level <= {level}) 
+    ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level}) 
 """,
         cnxn,
     )
