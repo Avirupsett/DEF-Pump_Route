@@ -322,7 +322,7 @@ def sales_based_on_admin_body(date_range,df1,df2):
         expense=df2[df2["expenseDate"]==i]["totalExpense"].sum()
         Product_list=pd.DataFrame()
         try:
-            if not (df1["incomeDate"]==i).empty:
+            if not df1[df1["incomeDate"]==i].empty:
                 Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
         except:
             print("No Product")
@@ -429,11 +429,17 @@ def sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn):
         for i in date_range:
             income=df1[df1["incomeDate"]==i]["totalIncome"].sum()
             expense=df2[df2["expenseDate"]==i]["totalExpense"].sum()
-           
-            Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","productName","unitName","unitShortName","singularShortName","rate","color"]).agg({"totalIncome":"sum","Quantity":"sum"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
+            Product_list=pd.DataFrame()
+
+            try:
+                if not df1[df1["incomeDate"]==i].empty:
+                    Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","productName","unitName","unitShortName","singularShortName","rate"]).agg({"totalIncome":"sum","Quantity":"sum"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
+                    Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
+                    Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
+            except:
+                print("No Product data")
+
             
-            Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
-            Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
             
             
             sales_based_on_date.append({
