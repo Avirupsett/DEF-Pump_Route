@@ -241,34 +241,27 @@ def total_sales_based_on_customer_body(df):
     df_by_mobile=pd.DataFrame()
     df_by_vehicle=pd.DataFrame()
     
-    try:
-        df_by_name_mask=df[df["CustomerName"]!=""]
-        if not df_by_name_mask.empty:
-            df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper()
-            df_by_name_mask=df_by_name_mask[df_by_name_mask["CustomerName"]!="XXX"]
-            df_by_name=df_by_name_mask.groupby(["CustomerName"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("CustomerName","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
-    except:
-        print("No CustomerName Data Found")
+  
+    df_by_name_mask=df[df["CustomerName"]!=""]
+    if not df_by_name_mask.empty:
+        df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper()
+        df_by_name_mask=df_by_name_mask[df_by_name_mask["CustomerName"]!="XXX"]
+        df_by_name=df_by_name_mask.groupby(["CustomerName"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("CustomerName","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
+    
 
-    try:
-        df_by_mobile_mask=df[df["MobileNo"]!=""]
-        if not df_by_mobile_mask.empty:
-            df_by_mobile_mask["MobileNo"]=df_by_mobile_mask["MobileNo"].str.replace(' ', '')
-            df_by_mobile_mask=df_by_mobile_mask[df_by_mobile_mask["MobileNo"]!="0000"]
-            df_by_mobile=df_by_mobile_mask.groupby(["MobileNo"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("MobileNo","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
-        
-    except:
-        print("No MobileNo Data Found")
+    df_by_mobile_mask=df[df["MobileNo"]!=""]
+    if not df_by_mobile_mask.empty:
+        df_by_mobile_mask["MobileNo"]=df_by_mobile_mask["MobileNo"].str.replace(' ', '')
+        df_by_mobile_mask=df_by_mobile_mask[df_by_mobile_mask["MobileNo"]!="0000"]
+        df_by_mobile=df_by_mobile_mask.groupby(["MobileNo"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("MobileNo","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
 
-    try:
-        df_by_vehicle_mask=df[df["VehicleNo"]!=""]
-        if not df_by_vehicle_mask.empty:
-            df_by_vehicle_mask["VehicleNo"]=df_by_vehicle_mask["VehicleNo"].str.replace(' ', '').str.upper()
-            df_by_vehicle_mask=df_by_vehicle_mask[df_by_vehicle_mask["VehicleNo"]!="XXX"]
-            df_by_vehicle=df_by_vehicle_mask.groupby(["VehicleNo"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("VehicleNo","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
-        
-    except:
-        print("No VehicleNo Data Found")
+
+    df_by_vehicle_mask=df[df["VehicleNo"]!=""]
+    if not df_by_vehicle_mask.empty:
+        df_by_vehicle_mask["VehicleNo"]=df_by_vehicle_mask["VehicleNo"].str.replace(' ', '').str.upper()
+        df_by_vehicle_mask=df_by_vehicle_mask[df_by_vehicle_mask["VehicleNo"]!="XXX"]
+        df_by_vehicle=df_by_vehicle_mask.groupby(["VehicleNo"],as_index=True).agg(total=("Total","sum"),count=("Total","count"),filterName=("VehicleNo","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
+  
         # Group the data by vehicle number and collect mobile numbers as lists
         # grouped = df.groupby('VehicleNo')['MobileNo'].apply(list)
 
@@ -321,11 +314,11 @@ def sales_based_on_admin_body(date_range,df1,df2):
         income=df1[df1["incomeDate"]==i]["totalIncome"].sum()
         expense=df2[df2["expenseDate"]==i]["totalExpense"].sum()
         Product_list=pd.DataFrame()
-        try:
-            if not df1[df1["incomeDate"]==i].empty:
-                Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
-        except:
-            print("No Product")
+        if not df1[df1["incomeDate"]==i].empty:
+            Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","rate"]).agg({"totalIncome":"sum","Quantity":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
+            Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
+            Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
+      
         # try:
         #     Sales_list=df1[(df1["incomeDate"]==i)].groupby(["officeId"]).agg({"totalIncome":"sum","officeName":"first","officeType":"first"}).reset_index()[["officeId","officeName","officeType","totalIncome"]]
         # except:
@@ -338,11 +331,7 @@ def sales_based_on_admin_body(date_range,df1,df2):
         #     Merged_list=pd.merge(Sales_list,Expense_list,on=["officeId","officeName","officeType"],how="outer").fillna(0)
         # except:
         #     Merged_list=pd.DataFrame()
-        try:
-            Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
-            Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
-        except:
-            Product_list=pd.DataFrame()
+        
                 
         alldata.append({
             "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),
@@ -431,15 +420,12 @@ def sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn):
             expense=df2[df2["expenseDate"]==i]["totalExpense"].sum()
             Product_list=pd.DataFrame()
 
-            try:
-                if not df1[df1["incomeDate"]==i].empty:
-                    Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","productName","unitName","unitShortName","singularShortName","rate"]).agg({"totalIncome":"sum","Quantity":"sum"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
-                    Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
-                    Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
-            except:
-                print("No Product data")
+    
+            if not df1[df1["incomeDate"]==i].empty:
+                Product_list=df1[(df1["incomeDate"]==i)].groupby(["productId","productName","unitName","unitShortName","singularShortName","rate","color"]).agg({"totalIncome":"sum","Quantity":"sum"}).reset_index()[["productId","productName","unitName","unitShortName","singularShortName","totalIncome","Quantity","rate","color"]]
+                Product_list.rename({"totalIncome":"totalSales","Quantity":"qty"},axis=1,inplace=True)
+                Product_list=Product_list.astype({"totalSales":int,"qty":int,"productId":int})
 
-            
             
             
             sales_based_on_date.append({
