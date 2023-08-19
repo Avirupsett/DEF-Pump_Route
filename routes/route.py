@@ -25,7 +25,6 @@ from flask import Blueprint
 
 route_page = Blueprint("simple_page", __name__)
 
-
 @route_page.route("/api/v1/route_plan", methods=["POST"])
 def create_post():
     request_data = request.get_json()
@@ -183,19 +182,31 @@ def sales_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     is_admin = int(_IsAdmin)
 
     cnxn = pyodbc.connect(ConnectionString)
-    Sales_Expense_df,product_type_list,sales_based_on_office,sales_based_on_customer = sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn)
+    Sales_Expense_df,product_type_list,sales_based_on_office,sales_based_on_customer,paymentMode = sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn)
     cnxn.close()
-    return jsonify({"graph1":Sales_Expense_df,"graph2":product_type_list,"graph3":sales_based_on_office,"graph4":sales_based_on_customer})
+    return {"graph1":Sales_Expense_df,"graph2":product_type_list,"graph3":sales_based_on_office,"graph4":sales_based_on_customer,"graph5":paymentMode}
 
-@route_page.route("/api/v1/dashboard/sales_customer/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET"])
+@route_page.route("/api/v1/dashboard/sales_customer/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET","POST"])
 def sales_customer(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     from_date = _FromDate
     to_date = _ToDate
     office_id = _OfficeId
     is_admin = int(_IsAdmin)
+    CustomerName = None
+    MobileNo = None
+    VehicleNo = None
+
+    request_data = request.get_json()
+    if request_data:
+        if "CustomerName" in request_data:
+            CustomerName=request_data["CustomerName"]
+        if "MobileNo" in request_data:
+            MobileNo=request_data["MobileNo"]
+        if "VehicleNo" in request_data:
+            VehicleNo=request_data["VehicleNo"]
 
     cnxn = pyodbc.connect(ConnectionString)
-    df = total_sales_based_on_customer(office_id,is_admin,from_date,to_date,cnxn)
+    df = total_sales_based_on_customer(office_id,is_admin,from_date,to_date,cnxn,CustomerName,MobileNo,VehicleNo)
     cnxn.close()
     return df
 

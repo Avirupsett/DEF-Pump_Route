@@ -171,11 +171,11 @@
      },
       "/api/v1/dashboard/sales_customer/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
         
-        "get": {
+        "post": {
           "tags": [
             "Dashboard"
           ],
-          "summary": "Get Sales By Customer (Name,VehicleNo,MobileNo)",
+          "summary": "Get Customer Details",
           "parameters": [
             {
               "name": "FromDate",
@@ -214,6 +214,17 @@
               }
             }
           ],
+          "requestBody": {
+            "description": "Vehicle Route Plan Post Object",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDetails"
+                }
+              }
+            }
+          },
           "responses": {
             "200": {
               "description": "OK"
@@ -449,6 +460,26 @@
               "format": "string",
               "example":["873F01B0-3AF7-4963-4C75-08DB2523436A","E048CE16-E666-401E-4C76-08DB2523436A"]
             }
+          }
+        },
+        "CustomerDetails": {
+          "type": "object",
+          "properties": {
+            "CustomerName": {
+              "type": "string",
+              "format": "string",
+              "example": "RAMJEET YADAV "
+            },
+            "MobileNo": {
+              "type": "string",
+              "format": "string",
+              "example":"7705874844"
+            },
+            "VehicleNo": {
+              "type": "string",
+              "format": "string"
+            }
+            
           }
         }
  
