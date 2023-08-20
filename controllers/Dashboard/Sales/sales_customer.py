@@ -99,7 +99,8 @@ WHERE
 def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,VehicleNo):
     
     try:
-        date_df = pd.DataFrame({"requestedDate": date_range})
+        alldata=[]
+        # date_df = pd.DataFrame({"requestedDate": date_range})
         if CustomerName!=None:
             df=df[df["CustomerName"].str.upper()==CustomerName]
         elif MobileNo!=None:
@@ -107,25 +108,26 @@ def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,Vehic
         elif VehicleNo!=None:
             df=df[df["VehicleNo"].str.replace(' ', '').str.upper()==VehicleNo]
         
-        alldata_df = date_df.merge(df, left_on="requestedDate",right_on="InvoiceDate", how="left")
-        alldata_df["requestedDate"] = alldata_df["requestedDate"].dt.strftime('%Y-%m-%d')
+        # alldata_df = date_df.merge(df, left_on="requestedDate",right_on="InvoiceDate", how="left")
+        # alldata_df["requestedDate"] = alldata_df["requestedDate"].dt.strftime('%Y-%m-%d')
         if not df.empty:
-            Sales_result = alldata_df.groupby("requestedDate").apply(lambda group: {
+            Sales_result = df.groupby("InvoiceDate").apply(lambda group: {
                     # "date": group["InvoiceDate"].iloc[0].strftime("%Y-%m-%d"),
                     "totalIncome": group["total"].sum(),
                     "lstproduct":group.groupby(["productId"]).agg({"total":"sum","qty":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index().to_dict(orient="records")})
         else:
-            Sales_result=pd.Series()
+            Sales_result=[]
     except:
         print("Sales Customer Details Error")
-    # for i in date_range:
-    #     alldata.append({
-    #             "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),
-    #             "totalIncome": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["totalIncome"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else 0,
-    #             "lstproduct": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["lstproduct"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else [],
-    #         })
+    for i in date_range:
+        alldata.append({
+                "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),
+                "totalIncome": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["totalIncome"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else 0,
+                "lstproduct": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["lstproduct"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else [],
+            })
     
-    return pd.DataFrame.from_dict(Sales_result.to_dict(),orient='index').reset_index().rename(columns={'index': 'requestedDate'}).to_dict(orient="records")
+    # return pd.DataFrame.from_dict(Sales_result.to_dict(),orient='index').reset_index().rename(columns={'index': 'requestedDate'}).to_dict(orient="records")
+    return alldata
 
 def total_sales_based_on_customer(office_id,is_admin,from_date,to_date,cnxn,CustomerName,MobileNo,VehicleNo):
     sales_based_on_customer=[]
