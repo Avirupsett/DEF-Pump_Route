@@ -88,8 +88,8 @@ FROM
         CreatedOn=df["CreatedOn"][0]
         UpdatedOn=df["UpdatedOn"][0]
         # Converting the datetime object into string
-        PlanDate=PlanDate.strftime("%Y-%m-%d") if PlanDate is not None else None
-        ExpectedDeliveryDate=ExpectedDeliveryDate.strftime("%Y-%m-%d") if ExpectedDeliveryDate is not None else None
+        PlanDate=PlanDate.strftime("%Y-%m-%d %H:%M") if PlanDate is not None else None
+        ExpectedDeliveryDate=ExpectedDeliveryDate.strftime("%Y-%m-%d %H:%M") if ExpectedDeliveryDate is not None else None
         CreatedOn=CreatedOn.strftime("%Y-%m-%d") if CreatedOn is not None else None 
         UpdatedOn=UpdatedOn.strftime("%Y-%m-%d") if UpdatedOn is not None else None
 

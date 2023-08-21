@@ -1,10 +1,10 @@
 import pandas as pd
-import time
+# import time
 
 def sales_based_on_admin_body(date_range,df1,df2):
     alldata=[]
     productdata=[]
-    start_time=time.time()
+    # start_time=time.time()
     try:
             
         if not df1.empty:
@@ -52,6 +52,6 @@ def sales_based_on_admin_body(date_range,df1,df2):
     except:
         print("Sales Expense Error")
 
-    print("Graph1 and Graph2: ",time.time()-start_time)
+    # print("Graph1 and Graph2: ",time.time()-start_time)
     
     return alldata,productdata

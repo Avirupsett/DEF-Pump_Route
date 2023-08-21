@@ -4,6 +4,7 @@ import numpy as np
 import pyodbc
 import warnings
 import os
+from datetime import datetime,timedelta
 warnings.filterwarnings("ignore")
 from config.config import ConnectionString
 
@@ -39,6 +40,8 @@ def create_post():
     Starting_PointName = None
     Starting_Point_latitude = None
     Starting_Point_longitude = None
+    PlanDateTime=None
+    DeliveryDateTime=None
 
     if request_data:
         if "ProductTypeId" in request_data:
@@ -52,9 +55,12 @@ def create_post():
 
         if "MinimumMultiple" in request_data:
             minimum_multiple = request_data["MinimumMultiple"]
+        
+        if "PlanDateTime" in request_data:
+            PlanDateTime = request_data["PlanDateTime"]
 
-        if "No_of_days_for_delivery" in request_data:
-            No_of_days_for_delivery = request_data["No_of_days_for_delivery"]
+        if "DeliveryDateTime" in request_data:
+            DeliveryDateTime = request_data["DeliveryDateTime"]
 
         if "DeliveryPlanId" in request_data:
             DeliveryPlanId = request_data["DeliveryPlanId"]
@@ -63,6 +69,15 @@ def create_post():
             Office_list = request_data["OfficeIdList"]
 
     cnxn = pyodbc.connect(ConnectionString)
+    date_format = "%Y-%m-%d %H:%M"
+    if PlanDateTime is not None and DeliveryDateTime is not None:
+        start_datetime = datetime.strptime(PlanDateTime, date_format).date()
+        end_datetime = datetime.strptime(DeliveryDateTime, date_format).date()
+
+        time_difference = end_datetime - start_datetime
+        No_of_days_for_delivery = time_difference.days
+    else:
+        No_of_days_for_delivery = 0
 
     if DeliveryPlanId:
         (
@@ -82,10 +97,18 @@ def create_post():
         str(Starting_PointId),
         Starting_Point_latitude,
         Starting_Point_longitude,
+        ExpectedDeliveryDate
     )
         if (len(df)>0):
-            df=pd.merge(pd.DataFrame(optimal_route1[0]),df[["officeId","AdminId","DeliveryPlanId","DeliveryPlanDetailsId","SequenceNo","ReceivedQuantity","ApprovedQuantity","DeliveryPlanStatusId","ApproveStatus"]],on="officeId",how="left")
+            df=pd.merge(optimal_route1[0],df[["officeId","AdminId","DeliveryPlanId","DeliveryPlanDetailsId","SequenceNo","ReceivedQuantity","ApprovedQuantity","DeliveryPlanStatusId","ApproveStatus"]],on="officeId",how="left")
             df = df.replace({np.nan: None})
+            time=0
+            for i in range(len(df)):
+     
+                if  i>1:
+                    time+=int(df.loc[i-1,"ApprovedQuantity"]//500)*30
+                    addedTime=datetime.strptime(df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
+                    df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
             
 
         return jsonify(
@@ -148,7 +171,15 @@ def create_post():
         str(Starting_PointId),
         Starting_Point_latitude,
         Starting_Point_longitude,
+        DeliveryDateTime
     )
+    optimal_route1_df=optimal_route1[0]
+    time=0
+    for i in range(len(optimal_route1_df)):
+        if i>1:
+            time+=int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"]//500)*30
+            addedTime=datetime.strptime(optimal_route1_df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
+            optimal_route1_df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
 
     return jsonify(
         Total_requirement=total_requirement,
@@ -157,7 +188,7 @@ def create_post():
         Routes={
             "Algorithm_1": {
                 "Description": "Routing based on Nearest Branch",
-                "Route": optimal_route1[0],
+                "Route": optimal_route1_df.to_dict(orient="records"),
                 "Total_distance": optimal_route1[1],
             },
         },

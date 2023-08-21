@@ -445,11 +445,17 @@
               "format": "number",
               "example":10000
             },
-            "No_of_days_for_delivery": {
-              "type": "number",
-              "format": "number",
-              "example":4
+            "PlanDateTime":{
+              "type":"string",
+              "format":"string",
+              "example":"2023-08-12 09:50"
             },
+            "DeliveryDateTime":{
+              "type":"string",
+              "format":"string",
+              "example":"2023-08-14 10:00"
+            },
+          
             "DeliveryPlanId": {
               "type": "number",
               "format": "number",

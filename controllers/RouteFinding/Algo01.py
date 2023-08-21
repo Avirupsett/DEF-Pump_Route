@@ -1,7 +1,7 @@
 import pandas as pd
 # import googlemaps
 from controllers.DistanceAway.distanceaway import haversine
-
+from datetime import datetime, timedelta
 # Replace 'YOUR_API_KEY' with your actual Google Maps API key
 # API_KEY = 'YOUR_API_KEY'
 
@@ -9,9 +9,10 @@ from controllers.DistanceAway.distanceaway import haversine
 # gmaps = googlemaps.Client(key=API_KEY)
 
 
-def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitude,startingLongitude):
+def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitude,startingLongitude,startTime):
 
     distance_matrix = []
+    speed_of_vehicle=40
     lat_lon_office=df[["latitude","longitude","officeName","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity"]]
     lat_lon_office.loc[len(lat_lon_office.index)]=[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0]
     lat_lon_office.reset_index(drop=True,inplace=True)
@@ -74,14 +75,24 @@ def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitud
             optimal_route=temp_route
 
     # optimal_route add latitude and longitude
-
     new_df=pd.DataFrame(columns=lat_lon_office.columns)
+    new_column_name = 'distance'
+    new_df[new_column_name] = []
+
+    date_format = "%Y-%m-%d %H:%M"
+    time=0
     for i in range(len(optimal_route)):
-        optimal_route[i]=lat_lon_office.loc[lat_lon_office["officeName"]==optimal_route[i]]
-        optimal_route[i]=optimal_route[i].values[0]
-        new_df.loc[i]=list(optimal_route[i])
+        distance=(distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]*35)/100+distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]
+        time += ((distance/speed_of_vehicle)*60)
        
-    return new_df.to_dict(orient='records') ,min_distance
+        addedTime =datetime.strptime(startTime, date_format) + timedelta(minutes=time)
+
+        lat_lon_office.loc[lat_lon_office["officeName"]==optimal_route[i],"distance"]=distance
+        lat_lon_office.loc[lat_lon_office["officeName"]==optimal_route[i],"estimatedDeliveryTime"]=datetime.strftime(addedTime, date_format)
+        Current_office=lat_lon_office.loc[lat_lon_office["officeName"]==optimal_route[i]]
+        new_df =new_df.append(Current_office.iloc[0], ignore_index=True)
+
+    return new_df ,min_distance
     # # Get the list of locations excluding the start/end point
     # locations = distance_matrix_df.columns.tolist()
     # locations.remove(startingPoint)

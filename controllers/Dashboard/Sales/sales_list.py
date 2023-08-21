@@ -3,10 +3,10 @@ from controllers.Dashboard.Sales.sales_list_functions.paymentMode import payment
 from controllers.Dashboard.Sales.sales_list_functions.salesCustomer import total_sales_based_on_customer_body
 from controllers.Dashboard.Sales.sales_list_functions.salesOffice import total_sales_based_on_office_body
 from controllers.Dashboard.Sales.sales_list_functions.salesExpense import sales_based_on_admin_body
-import time
+# import time
 
 def Sales_Traverse_list(office_id,from_date,to_date,level,cnxn):
-    start_time=time.time()
+    # start_time=time.time()
     Sales_df1=pd.read_sql_query(f'''
   WITH cte_org AS (
     SELECT
@@ -104,10 +104,10 @@ WHERE
     ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level})
     ''',cnxn)
     
-    print("Sales Query Time: ",time.time()-start_time)
+    # print("Sales Query Time: ",time.time()-start_time)
     return Sales_df1
 def Expense_Traverse_list(office_id,from_date,to_date,level,cnxn):
-    start_time=time.time()
+    # start_time=time.time()
     Expense_df2=pd.read_sql_query(f'''
    WITH cte_org AS (
     SELECT
@@ -179,7 +179,7 @@ WHERE
    ct.IsActive=1 and ({level} < 0 OR ct.Level <= {level})
     ''',cnxn)
 
-    print("Expense Query Time: ",time.time()-start_time)
+    # print("Expense Query Time: ",time.time()-start_time)
     return Expense_df2
 
 
@@ -190,7 +190,7 @@ def sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn):
     sales_based_on_office=[]
     sales_based_on_customer=[]
     paymentMode=[]
-    start_time=time.time()
+    # start_time=time.time()
     if is_admin==6:
         date_range=pd.date_range(from_date,to_date)
         df1=Sales_Traverse_list(office_id,from_date,to_date,-1,cnxn)
@@ -277,7 +277,7 @@ def sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn):
         sales_based_on_customer=total_sales_based_on_customer_body(df1)
         paymentMode=paymentMode_Body(df1,cnxn)
     
-    print("Final Results: ",time.time()-start_time)
+    # print("Final Results: ",time.time()-start_time)
 
 
     return sales_based_on_date,sales_based_on_product,sales_based_on_office,sales_based_on_customer,paymentMode
