@@ -47,17 +47,14 @@ WITH cte_org AS (
     INNER JOIN cte_org o ON o.OfficeId = e.MasterOfficeId
 )
 
-SELECT
+SELECT DISTINCT
     ct.IsActive,
     ct.Level as level,
     ct.MasterOfficeId As masterOfficeId,
     ct.OfficeId As officeId,
     ct.OfficeName As officeName,
     ot.OfficeTypeName As officeType,
-	S.totalIncome As totalIncome,
-	S.incomeCount As incomeCount,
-	E.totalExpense As totalExpense,
-	E.expenseCount As expenseCount,
+	S.Total,
     ANR.Name As Name
 	
 FROM cte_org ct
@@ -65,32 +62,22 @@ LEFT OUTER JOIN OfficeType ot ON ct.OfficeTypeId = ot.OfficeTypeId
 
 Left Outer join
 (
-Select SUM(Total) As totalIncome,Count(Total) As incomeCount,OfficeId
+Select SUM(Total) AS Total,OfficeId
 From Sales
 Where
 IsDeleted=0 And
 InvoiceDate>='{from_date}' AND InvoiceDate<='{to_date}'
-Group By
+GROUP BY
 OfficeId
 )S On ct.officeId=S.OfficeId 
 
-Left Outer join
-(
-Select officeId,SUM(Amount) As totalExpense,Count(Amount) As expenseCount
-From Expense
-Where
-VoucherDate>='{from_date}' AND VoucherDate<='{to_date}'
-Group By
-officeId
-)E On ct.officeId=E.OfficeId
-
-Left Join
+Inner Join
 UserOfficeMapper UM ON ct.OfficeId=UM.OfficeId
 
-Left Join
+Inner Join
 AspNetUserRoles ANUR ON ANUR.userId=UM.userId
 
-Left Join
+Inner Join
 AspNetRoles ANR ON ANR.Id=ANUR.RoleId
 
 WHERE
@@ -112,7 +99,8 @@ def CardDetails(office_id,is_admin,cnxn):
         #df = CardDetails_level(office_id,previous_7_date,previous_date,-1,cnxn)
         df1=df
         copy_df=df1.copy()
-        df1=df1[~((df1['Name']=="SuperAdmin")|(df1["officeId"].str.lower()==office_id.lower())|(df1["level"]>1))]
+        df1=df1[df["level"]>0]
+        df1=df1[~((df1['Name']=="SuperAdmin")|(df1["officeId"].str.lower()==office_id.lower()))]
         df1.fillna(0,inplace=True)
         Sales_Expense_df=df1[["officeId","officeType"]].drop_duplicates()
         officeCount=Sales_Expense_df['officeType'].value_counts().to_dict()

@@ -208,7 +208,7 @@ def sales_customer(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     cnxn = pyodbc.connect(ConnectionString)
     df = total_sales_based_on_customer(office_id,is_admin,from_date,to_date,cnxn,CustomerName,MobileNo,VehicleNo)
     cnxn.close()
-    return df
+    return jsonify(df)
 
 @route_page.route("/api/v1/dashboard/total_sales/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET"])
 def total_sales_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
