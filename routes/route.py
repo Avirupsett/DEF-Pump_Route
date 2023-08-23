@@ -12,6 +12,7 @@ from controllers.Extraction.extraction import Extracting, ExtractingFromOfficeId
 from controllers.Extraction.extraExtraction import ExtractingFromDeliveryPlan
 from controllers.Dashboard.Sales.dropdown_list import dropdown_list
 from controllers.Dashboard.Sales.sales_list import sales_based_on_admin
+from controllers.Dashboard.Sales.ExistingCurrent import ExistingCurrentCustomer
 from controllers.Dashboard.Sales.sales_customer import total_sales_based_on_customer
 from controllers.Dashboard.Sales.total_sales import total_sales
 from controllers.Dashboard.Sales.card_details import CardDetails
@@ -216,6 +217,18 @@ def sales_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     Sales_Expense_df,product_type_list,sales_based_on_office,sales_based_on_customer,paymentMode = sales_based_on_admin(office_id,is_admin,from_date,to_date,cnxn)
     cnxn.close()
     return {"graph1":Sales_Expense_df,"graph2":product_type_list,"graph3":sales_based_on_office,"graph4":sales_based_on_customer,"graph5":paymentMode}
+
+@route_page.route("/api/v1/dashboard/customer_list/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET"])
+def Customer_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
+    from_date = _FromDate
+    to_date = _ToDate
+    office_id = _OfficeId
+    is_admin = int(_IsAdmin)
+
+    cnxn = pyodbc.connect(ConnectionString)
+    df = ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn)
+    cnxn.close()
+    return df
 
 @route_page.route("/api/v1/dashboard/sales_customer/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET","POST"])
 def sales_customer(_FromDate,_ToDate,_OfficeId,_IsAdmin):

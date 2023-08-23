@@ -116,6 +116,59 @@
           }
         }
      },
+      "/api/v1/dashboard/customer_list/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+        
+        "get": {
+          "tags": [
+            "Dashboard"
+          ],
+          "summary": "Existing Vs New Customer Graph",
+          "parameters": [
+            {
+              "name": "FromDate",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"2023-07-01"
+              }
+            },
+            {
+              "name": "ToDate",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"2023-07-10"
+              }
+            },
+            {
+              "name": "OfficeId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"string",
+                "example":"06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
+              }
+            },
+            {
+              "name": "IsAdmin",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type":"number",
+                 "example":6
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+             
+            }
+          }
+        }
+     },
       "/api/v1/dashboard/total_sales/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
         
         "get": {

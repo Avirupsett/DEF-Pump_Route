@@ -98,8 +98,9 @@ WHERE
 
 def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,VehicleNo):
     
+    alldata=[]
+    Sales_result=pd.DataFrame()
     try:
-        alldata=[]
         # date_df = pd.DataFrame({"requestedDate": date_range})
         if CustomerName!=None:
             df=df[df["CustomerName"].str.upper()==CustomerName]
