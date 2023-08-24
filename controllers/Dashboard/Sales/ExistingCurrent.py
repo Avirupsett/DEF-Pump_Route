@@ -242,10 +242,7 @@ def ExistingCurrentCustomer_body(Previous_df,Current_df):
     }
 
 def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
-    Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,-1,cnxn)
-    Current_df=CurrentCustomer_Traverse_list(office_id,from_date,to_date,-1,cnxn)
 
-    
     if is_admin==6:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,-1,cnxn)
         Current_df=CurrentCustomer_Traverse_list(office_id,from_date,to_date,-1,cnxn)
