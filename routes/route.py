@@ -43,6 +43,7 @@ def create_post():
     Starting_Point_longitude = None
     PlanDateTime=None
     DeliveryDateTime=None
+    No_of_days_for_delivery=None
 
     if request_data:
         if "ProductTypeId" in request_data:
@@ -56,6 +57,9 @@ def create_post():
 
         if "MinimumMultiple" in request_data:
             minimum_multiple = request_data["MinimumMultiple"]
+
+        if "No_of_days_for_delivery" in request_data:
+            No_of_days_for_delivery = request_data["No_of_days_for_delivery"]
         
         if "PlanDateTime" in request_data:
             PlanDateTime = request_data["PlanDateTime"]
@@ -77,8 +81,8 @@ def create_post():
 
         time_difference = end_datetime - start_datetime
         No_of_days_for_delivery = time_difference.days
-    else:
-        No_of_days_for_delivery = 0
+    # else:
+    #     No_of_days_for_delivery = 0
 
     if DeliveryPlanId:
         (
@@ -228,7 +232,7 @@ def Customer_list(_FromDate,_ToDate,_OfficeId,_IsAdmin):
     cnxn = pyodbc.connect(ConnectionString)
     df = ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn)
     cnxn.close()
-    return df
+    return jsonify(df)
 
 @route_page.route("/api/v1/dashboard/sales_customer/<string:_FromDate>/<string:_ToDate>/<string:_OfficeId>/<string:_IsAdmin>", methods=["GET","POST"])
 def sales_customer(_FromDate,_ToDate,_OfficeId,_IsAdmin):
