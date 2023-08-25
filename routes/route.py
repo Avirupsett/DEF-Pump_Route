@@ -74,7 +74,7 @@ def create_post():
             Office_list = request_data["OfficeIdList"]
 
     cnxn = pyodbc.connect(ConnectionString)
-    date_format = "%Y-%m-%d %H:%M"
+    date_format = "%Y-%m-%d %H:%M:%S"
     if PlanDateTime is not None and DeliveryDateTime is not None:
         start_datetime = datetime.strptime(PlanDateTime, date_format).date()
         end_datetime = datetime.strptime(DeliveryDateTime, date_format).date()

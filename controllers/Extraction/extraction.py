@@ -195,7 +195,14 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     df.dropna(inplace=True)
 
     df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery 
-    df["atDeliveryRequirement"] = df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
+    print(df["atDeliveryRequirement"])
+    for i in range(len(df)):
+        if df.loc[i,"atDeliveryRequirement"]>df.loc[i,"totalCapacity"]:
+            df.loc[i,"atDeliveryRequirement"]=df.loc[i,"totalCapacity"]
+        else:
+            df.loc[i,"atDeliveryRequirement"]=df.loc[i,"atDeliveryRequirement"]
+    # print(df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"],axis=1))
+    # df["atDeliveryRequirement"] = df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"])
 
     df["requirement%"]=df["atDeliveryRequirement"]/df["totalCapacity"]*100
     df["requirement%"].fillna(0,inplace=True)

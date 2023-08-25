@@ -78,8 +78,8 @@ def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitud
     new_df=pd.DataFrame(columns=lat_lon_office.columns)
     new_column_name = 'distance'
     new_df[new_column_name] = []
-
-    date_format = "%Y-%m-%d %H:%M"
+    
+    date_format = "%Y-%m-%d %H:%M:%S"
     time=0
     for i in range(len(optimal_route)):
         distance=(distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]*35)/100+distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]
