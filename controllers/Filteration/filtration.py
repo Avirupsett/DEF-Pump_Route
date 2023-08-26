@@ -2,8 +2,11 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 
 def Filtering(df,Tank_Capacity,No_of_days_for_delivery,minimum_multiple):
-    df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery 
-    df["atDeliveryRequirement"] = df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
+    df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery
+    df.reset_index(inplace=True)
+    for i in range(len(df)):
+        df.loc[i,"atDeliveryRequirement"]=df.loc[i,"totalCapacity"] if df.loc[i,"atDeliveryRequirement"]>df.loc[i,"totalCapacity"] else df.loc[i,"atDeliveryRequirement"]
+    # df["atDeliveryRequirement"] = df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
 
     # for i in range(len(df)):
     #     df.loc[i,"atDeliveryRequirement"]=df.loc[i,"totalCapacity"] if df.loc[i,"atDeliveryRequirement"]>df.loc[i,"totalCapacity"] else df.loc[i,"atDeliveryRequirement"]

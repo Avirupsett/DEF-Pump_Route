@@ -178,7 +178,7 @@ def ExistingCurrentCustomer_body(Previous_df,Current_df):
     ExistingCustomerByVehicle=pd.DataFrame()
     NewCustomerByVehicle=pd.DataFrame()
     if not Previous_df.empty:
-        Previous_df['CustomerName']=Previous_df['CustomerName'].str.upper()
+        Previous_df['CustomerName']=Previous_df['CustomerName'].str.upper().str.strip()
         Previous_df_byname=Previous_df[(Previous_df["CustomerName"]!="XXX")|(Previous_df["CustomerName"]!="")]
         Previous_df_byname=Previous_df_byname['CustomerName'].unique()
 
@@ -192,7 +192,7 @@ def ExistingCurrentCustomer_body(Previous_df,Current_df):
 
     df_by_name_mask=Current_df[Current_df["CustomerName"]!=""]
     if not df_by_name_mask.empty:
-        df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper()
+        df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper().str.strip()
         df_by_name_mask=df_by_name_mask[df_by_name_mask["CustomerName"]!="XXX"]
         df_by_name_mask=df_by_name_mask.groupby('CustomerName',as_index=False).agg(totalCount=('CustomerName','count'),totalSales=('totalIncome','sum'))
 

@@ -103,7 +103,7 @@ def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,Vehic
     try:
         # date_df = pd.DataFrame({"requestedDate": date_range})
         if CustomerName!=None:
-            df=df[df["CustomerName"].str.upper()==CustomerName]
+            df=df[df["CustomerName"].str.upper().str.strip()==CustomerName]
         elif MobileNo!=None:
             df=df[df["MobileNo"].str.replace(' ', '')==MobileNo]
         elif VehicleNo!=None:

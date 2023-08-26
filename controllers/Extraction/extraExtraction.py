@@ -100,7 +100,13 @@ FROM
         Unselected_df=Unselected_df[~Unselected_df["officeId"].isin(office_list)]
     
         Unselected_df["atDeliveryRequirement"]=Unselected_df["totalCapacity"]-Unselected_df["currentStock"]+Unselected_df["avgSales"]*No_of_days_for_delivery 
-        Unselected_df["atDeliveryRequirement"] = Unselected_df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
+        Unselected_df.reset_index(inplace=True)
+        for i in range(len(Unselected_df)):
+            if Unselected_df.loc[i,"atDeliveryRequirement"]>Unselected_df.loc[i,"totalCapacity"]:
+                Unselected_df.loc[i,"atDeliveryRequirement"]=Unselected_df.loc[i,"totalCapacity"]
+            else:
+                Unselected_df.loc[i,"atDeliveryRequirement"]=Unselected_df.loc[i,"atDeliveryRequirement"]
+        # Unselected_df["atDeliveryRequirement"] = Unselected_df.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
         Unselected_df["requirement%"]=Unselected_df["atDeliveryRequirement"]/Unselected_df["totalCapacity"]*100
         Unselected_df["requirement%"].fillna(0,inplace=True)
         Unselected_df["atDeliveryRequirement"]= (Unselected_df["atDeliveryRequirement"]//minimum_multiple)*minimum_multiple

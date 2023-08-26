@@ -224,8 +224,15 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     Not_selected=df2[~df2["officeId"].isin(office_list)]
 
     # Not_selected=pd.merge(df2,df,indicator=True,how='outer').query('_merge=="left_only"').drop('_merge',axis=1)
-    Not_selected["atDeliveryRequirement"]=Not_selected["totalCapacity"]-Not_selected["currentStock"]+Not_selected["avgSales"]*No_of_days_for_delivery 
-    Not_selected["atDeliveryRequirement"] = Not_selected.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"], axis=1)
+    Not_selected["atDeliveryRequirement"]=Not_selected["totalCapacity"]-Not_selected["currentStock"]+Not_selected["avgSales"]*No_of_days_for_delivery
+    Not_selected.reset_index(inplace=True)
+    for i in range(len(Not_selected)):
+        if Not_selected.loc[i,"atDeliveryRequirement"]>Not_selected.loc[i,"totalCapacity"]:
+            Not_selected.loc[i,"atDeliveryRequirement"]=Not_selected.loc[i,"totalCapacity"]
+        else:
+            Not_selected.loc[i,"atDeliveryRequirement"]=Not_selected.loc[i,"atDeliveryRequirement"]
+
+        # Not_selected["atDeliveryRequirement"] = Not_selected.apply(lambda row: row["totalCapacity"] if row["atDeliveryRequirement"] > row["totalCapacity"] else row["atDeliveryRequirement"])
 
     Not_selected["requirement%"]=Not_selected["atDeliveryRequirement"]/Not_selected["totalCapacity"]*100
     Not_selected["requirement%"].fillna(0,inplace=True)

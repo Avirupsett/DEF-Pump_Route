@@ -8,7 +8,7 @@ def total_sales_based_on_customer_body(df):
     try:
         df_by_name_mask=df[df["CustomerName"]!=""]
         if not df_by_name_mask.empty:
-            df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper()
+            df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper().str.strip()
             df_by_name_mask=df_by_name_mask[df_by_name_mask["CustomerName"]!="XXX"]
             df_by_name=df_by_name_mask.groupby(["CustomerName"],as_index=True).agg(total=("totalIncome","sum"),count=("totalIncome","count"),filterName=("CustomerName","first")).sort_values(by=["total"],ascending=True).reset_index(drop=True)[-10:]
         
