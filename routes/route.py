@@ -111,7 +111,7 @@ def create_post():
             for i in range(len(df)):
      
                 if  i>1:
-                    time+=int(df.loc[i-1,"ApprovedQuantity"]//500)*30
+                    time+=int(df.loc[i-1,"ApprovedQuantity"]//1000)*60 if df.loc[i-1,"ApprovedQuantity"] and int(df.loc[i-1,"ApprovedQuantity"])>=1000 else 60
                     addedTime=datetime.strptime(df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
                     df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
             
@@ -182,7 +182,7 @@ def create_post():
     time=0
     for i in range(len(optimal_route1_df)):
         if i>1:
-            time+=int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"]//500)*30
+            time+=int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"]//1000)*60 if optimal_route1_df.loc[i-1,"atDeliveryRequirement"] and int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"])>=1000 else 60
             addedTime=datetime.strptime(optimal_route1_df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
             optimal_route1_df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
 
