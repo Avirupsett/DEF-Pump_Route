@@ -115,10 +115,12 @@ su.OfficeId
     
 
     df["requirement%"].fillna(0, inplace=True)
+    df["avgSales"].fillna(0, inplace=True)
     df.dropna(inplace=True)
     
     df.sort_values(by="requirement%", inplace=True, ascending=False)
     df.reset_index(inplace=True, drop=True)
+    
 
     return df
 
@@ -192,10 +194,11 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
    
 
     df["requirement%"].fillna(0, inplace=True)
+    df["avgSales"].fillna(0, inplace=True)
     df.dropna(inplace=True)
 
     df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery 
-    print(df["atDeliveryRequirement"])
+    df.reset_index(inplace=True)
     for i in range(len(df)):
         if df.loc[i,"atDeliveryRequirement"]>df.loc[i,"totalCapacity"]:
             df.loc[i,"atDeliveryRequirement"]=df.loc[i,"totalCapacity"]
