@@ -115,7 +115,8 @@ def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,Vehic
             Sales_result = df.groupby("InvoiceDate").apply(lambda group: {
                     # "date": group["InvoiceDate"].iloc[0].strftime("%Y-%m-%d"),
                     "totalIncome": group["total"].sum(),
-                    "lstproduct":group.groupby(["productId"]).agg({"total":"sum","qty":"sum","productName":"first","unitName":"first","unitShortName":"first","singularShortName":"first","color":"first"}).reset_index().to_dict(orient="records")})
+                    "totalCount": int(group["total"].count()),
+                    "lstproduct":group.groupby(["productId"]).agg(total=("total","sum"),count=("total","count"),qty=("qty","sum"),productName=("productName","first"),unitName=("unitName","first"),unitShortName=("unitShortName","first"),singularShortName=("singularShortName","first"),color=("color","first")).reset_index().to_dict(orient="records")})
         else:
             Sales_result=[]
     except:
@@ -124,6 +125,7 @@ def total_sales_based_on_customer_body(df,date_range,CustomerName,MobileNo,Vehic
         alldata.append({
                 "requestedDate": pd.to_datetime(i).strftime("%Y-%m-%d"),
                 "totalIncome": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["totalIncome"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else 0,
+                "totalCount": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["totalCount"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else 0,
                 "lstproduct": Sales_result[pd.to_datetime(i).strftime("%Y-%m-%d")]["lstproduct"] if pd.to_datetime(i).strftime("%Y-%m-%d") in Sales_result else [],
             })
     

@@ -264,51 +264,51 @@ def ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range):
     if not df_by_name_mask.empty:
         df_by_name_mask["CustomerName"]=df_by_name_mask["CustomerName"].str.upper()
         df_by_name_mask=df_by_name_mask[df_by_name_mask["CustomerName"]!="XXX"]
-        df_by_name_mask=df_by_name_mask.groupby(['incomeDate','CustomerName'],as_index=False).agg(totalCount=('CustomerName','count'))
+        df_by_name_mask=df_by_name_mask.groupby(['incomeDate','CustomerName'],as_index=False).agg(totalCount=('CustomerName','count'),totalSales=('totalIncome','sum'))
 
         ExistingCustomerByName=df_by_name_mask[df_by_name_mask['CustomerName'].isin(Previous_df_byname)]
         NewCustomerByName=df_by_name_mask[~df_by_name_mask['CustomerName'].isin(Previous_df_byname)]
         
-        ExistingCustomerByName=ExistingCustomerByName.groupby('incomeDate').agg(count=('incomeDate','count'))
-        NewCustomerByName=NewCustomerByName.groupby('incomeDate').agg(count=('incomeDate','count'))
+        ExistingCustomerByName=ExistingCustomerByName.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
+        NewCustomerByName=NewCustomerByName.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
 
     df_by_mobile_mask=Current_df[Current_df["MobileNo"]!=""]
     if not df_by_mobile_mask.empty:
         df_by_mobile_mask["MobileNo"]=df_by_mobile_mask["MobileNo"].str.replace(' ', '')
         df_by_mobile_mask=df_by_mobile_mask[df_by_mobile_mask["MobileNo"]!="0000"]
-        df_by_mobile_mask=df_by_mobile_mask.groupby(['incomeDate','MobileNo'],as_index=False).agg(totalCount=('MobileNo','count'))
+        df_by_mobile_mask=df_by_mobile_mask.groupby(['incomeDate','MobileNo'],as_index=False).agg(totalCount=('MobileNo','count'),totalSales=('totalIncome','sum'))
 
         ExistingCustomerByMobile=df_by_mobile_mask[df_by_mobile_mask['MobileNo'].isin(Previous_df_bymobile)]
         NewCustomerByMobile=df_by_mobile_mask[~df_by_mobile_mask['MobileNo'].isin(Previous_df_bymobile)]
         
-        ExistingCustomerByMobile=ExistingCustomerByMobile.groupby('incomeDate').agg(count=('incomeDate','count'))
-        NewCustomerByMobile=NewCustomerByMobile.groupby('incomeDate').agg(count=('incomeDate','count'))
+        ExistingCustomerByMobile=ExistingCustomerByMobile.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
+        NewCustomerByMobile=NewCustomerByMobile.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
     
     df_by_vehicle_mask=Current_df[Current_df["VehicleNo"]!=""]
     if not df_by_vehicle_mask.empty:
         df_by_vehicle_mask["VehicleNo"]=df_by_vehicle_mask["VehicleNo"].str.replace(' ', '').str.upper()
         df_by_vehicle_mask=df_by_vehicle_mask[df_by_vehicle_mask["VehicleNo"]!="XXX"]
-        df_by_vehicle_mask=df_by_vehicle_mask.groupby(['incomeDate','VehicleNo'],as_index=False).agg(totalCount=('VehicleNo','count'))
+        df_by_vehicle_mask=df_by_vehicle_mask.groupby(['incomeDate','VehicleNo'],as_index=False).agg(totalCount=('VehicleNo','count'),totalSales=('totalIncome','sum'))
 
         ExistingCustomerByVehicle=df_by_vehicle_mask[df_by_vehicle_mask['VehicleNo'].isin(Previous_df_byvehicle)]
         NewCustomerByVehicle=df_by_vehicle_mask[~df_by_vehicle_mask['VehicleNo'].isin(Previous_df_byvehicle)]
         
-        ExistingCustomerByVehicle=ExistingCustomerByVehicle.groupby('incomeDate').agg(count=('incomeDate','count'))
-        NewCustomerByVehicle=NewCustomerByVehicle.groupby('incomeDate').agg(count=('incomeDate','count'))
+        ExistingCustomerByVehicle=ExistingCustomerByVehicle.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
+        NewCustomerByVehicle=NewCustomerByVehicle.groupby('incomeDate').agg(count=('incomeDate','count'),totalSales=('totalSales','sum'))
 
    
     return {
             'byName':{
-                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByName.loc[i,"count"])} if i in ExistingCustomerByName.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range],
-                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByName.loc[i,"count"])} if i in NewCustomerByName.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range]
+                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByName.loc[i,"count"]),"sales":ExistingCustomerByName.loc[i,"totalSales"]} if i in ExistingCustomerByName.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range],
+                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByName.loc[i,"count"]),"sales":NewCustomerByName.loc[i,"totalSales"]} if i in NewCustomerByName.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range]
             },
             'byMobile':{
-                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByMobile.loc[i,"count"])} if i in ExistingCustomerByMobile.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range],
-                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByMobile.loc[i,"count"])} if i in NewCustomerByMobile.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range]
+                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByMobile.loc[i,"count"]),"sales":ExistingCustomerByMobile.loc[i,"totalSales"]} if i in ExistingCustomerByMobile.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range],
+                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByMobile.loc[i,"count"]),"sales":NewCustomerByMobile.loc[i,"totalSales"]} if i in NewCustomerByMobile.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range]
             },
             'byVehicle':{
-                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByVehicle.loc[i,"count"])} if i in ExistingCustomerByVehicle.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range],
-                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByVehicle.loc[i,"count"])} if i in NewCustomerByVehicle.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0}  for i in date_range]
+                'existingCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(ExistingCustomerByVehicle.loc[i,"count"]),"sales":ExistingCustomerByVehicle.loc[i,"totalSales"]} if i in ExistingCustomerByVehicle.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range],
+                'newCustomer':[{"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":int(NewCustomerByVehicle.loc[i,"count"]),"sales":NewCustomerByVehicle.loc[i,"totalSales"]} if i in NewCustomerByVehicle.index else {"requestedDate":datetime.strftime(i,"%Y-%m-%d"),"count":0,"sales":0}  for i in date_range]
             }
 
     }
