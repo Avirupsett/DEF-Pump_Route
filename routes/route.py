@@ -44,6 +44,9 @@ def create_post():
     PlanDateTime=None
     DeliveryDateTime=None
     No_of_days_for_delivery=None
+    Stoppage_unloading_time=60
+    Extra_unloading_time=30
+    speed_of_vehicle=40
 
     if request_data:
         if "ProductTypeId" in request_data:
@@ -72,6 +75,18 @@ def create_post():
 
         if "OfficeIdList" in request_data:
             Office_list = request_data["OfficeIdList"]
+
+        if "SpeedOfVehicle" in request_data:
+            if request_data["SpeedOfVehicle"]:
+                speed_of_vehicle = request_data["SpeedOfVehicle"]
+
+        if "StoppageUnloadingTime" in request_data:
+            if request_data["StoppageUnloadingTime"]:
+                Stoppage_unloading_time = request_data["StoppageUnloadingTime"]
+
+        if "ExtraUnloadingTime" in request_data:
+            if request_data["ExtraUnloadingTime"]:
+                Extra_unloading_time = request_data["ExtraUnloadingTime"]
 
     cnxn = pyodbc.connect(ConnectionString)
     date_format = "%Y-%m-%d %H:%M:%S"
@@ -102,7 +117,8 @@ def create_post():
         str(Starting_PointId),
         Starting_Point_latitude,
         Starting_Point_longitude,
-        ExpectedDeliveryDate
+        ExpectedDeliveryDate,
+        speed_of_vehicle
     )
         if (len(df)>0):
             df["DeliveredAt"]=pd.to_datetime(df["DeliveredAt"]).dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -112,7 +128,7 @@ def create_post():
             for i in range(len(df)):
      
                 if  i>1:
-                    time+=int(df.loc[i-1,"ApprovedQuantity"]//1000)*60 if df.loc[i-1,"ApprovedQuantity"] and int(df.loc[i-1,"ApprovedQuantity"])>=1000 else 60
+                    time+=int((df.loc[i-1,"ApprovedQuantity"]-1000)//500)*Extra_unloading_time+Stoppage_unloading_time if df.loc[i-1,"ApprovedQuantity"] and int(df.loc[i-1,"ApprovedQuantity"])>1000 else Stoppage_unloading_time
                     addedTime=datetime.strptime(df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
                     df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
             
@@ -177,13 +193,14 @@ def create_post():
         str(Starting_PointId),
         Starting_Point_latitude,
         Starting_Point_longitude,
-        DeliveryDateTime
+        DeliveryDateTime,
+        speed_of_vehicle
     )
     optimal_route1_df=optimal_route1[0]
     time=0
     for i in range(len(optimal_route1_df)):
         if i>1:
-            time+=int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"]//1000)*60 if optimal_route1_df.loc[i-1,"atDeliveryRequirement"] and int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"])>=1000 else 60
+            time+=int((optimal_route1_df.loc[i-1,"atDeliveryRequirement"]-1000)//500)*Extra_unloading_time+Stoppage_unloading_time if optimal_route1_df.loc[i-1,"atDeliveryRequirement"] and int(optimal_route1_df.loc[i-1,"atDeliveryRequirement"])>1000 else Stoppage_unloading_time
             addedTime=datetime.strptime(optimal_route1_df.loc[i,"estimatedDeliveryTime"], date_format) + timedelta(minutes=time)
             optimal_route1_df.loc[i,"estimatedDeliveryTime"]=datetime.strftime(addedTime,date_format)
 

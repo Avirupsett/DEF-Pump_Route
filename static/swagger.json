@@ -1,547 +1,538 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "version": "1.0.0",
-      "title": "DEF Pumpline"
-    },
-    
-
-    "paths": {
-      "/api/v1/route_plan": {
-        "post": {
-          "tags": [
-            "Vehicle Route Plan"
-          ],
-          "summary": "Create a new Vehicle Route Plan",
-          "requestBody": {
-            "description": "Vehicle Route Plan Post Object",
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VehicleRoutePlan"
-                }
-              }
-            }
-          },
-          "produces": [
-            "application/json"
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-            },
-            "400": {
-              "description": "Failed. Bad post data."
-            }
-          }
-        }
-      },
-      "/api/v1/dashboard/dropdown_list/{UserId}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Dropdown list",
-          "parameters": [
-            {
-              "name": "UserId",
-              "in": "path",
-              "required": true,
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "DEF Pumpline"
+  },
+  "paths": {
+    "/api/v1/route_plan": {
+      "post": {
+        "tags": [
+          "Vehicle Route Plan"
+        ],
+        "summary": "Create a new Vehicle Route Plan",
+        "requestBody": {
+          "description": "Vehicle Route Plan Post Object",
+          "required": true,
+          "content": {
+            "application/json": {
               "schema": {
-                "type":"string",
-                "example":"8379AC15-C52A-4F2E-D69C-08DAF9596B0B"
+                "$ref": "#/components/schemas/VehicleRoutePlan"
               }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/sales_list/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Sales list",
-          "parameters": [
-            {
-              "name": "FromDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-01"
-              }
-            },
-            {
-              "name": "ToDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-10"
-              }
-            },
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":6
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/customer_list/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Existing Vs New Customer Graph",
-          "parameters": [
-            {
-              "name": "FromDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-01"
-              }
-            },
-            {
-              "name": "ToDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-10"
-              }
-            },
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":6
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/total_sales/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Total Sales By Business Entity",
-          "parameters": [
-            {
-              "name": "FromDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-01"
-              }
-            },
-            {
-              "name": "ToDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-30"
-              }
-            },
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"D5355D33-02CF-40B0-5246-08DA286D7F4A"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":6
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/sales_customer/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
-        
-        "post": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Customer Details",
-          "parameters": [
-            {
-              "name": "FromDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-01"
-              }
-            },
-            {
-              "name": "ToDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-30"
-              }
-            },
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"D5355D33-02CF-40B0-5246-08DA286D7F4A"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":6
-              }
-            }
-          ],
-          "requestBody": {
-            "description": "Vehicle Route Plan Post Object",
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerDetails"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/payment/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get PaymentMode list",
-          "parameters": [
-            {
-              "name": "FromDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-01"
-              }
-            },
-            {
-              "name": "ToDate",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"2023-07-10"
-              }
-            },
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":6
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/card_details_list/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Card Details list (UserCounts, OfficeCounts, Last 7 days Sales & Expense, Current Sales & Expense)",
-          "parameters": [
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":1
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/godowntype/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get GodownType list (Tank,General,Reserver)",
-          "parameters": [
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":1
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/godown_details_list/{OfficeId}/{IsAdmin}": {
-        
-        "get": {
-          "tags": [
-            "Dashboard"
-          ],
-          "summary": "Get Godown Stock Details",
-          "parameters": [
-            {
-              "name": "OfficeId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
-              }
-            },
-            {
-              "name": "IsAdmin",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"number",
-                 "example":1
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     },
-      "/api/v1/dashboard/userdetails/{UserId}": {
-        
-        "get": {
-          "tags": [
-            "User Details"
-          ],
-          "summary": "Get User Details",
-          "parameters": [
-            {
-              "name": "UserId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type":"string",
-                "example":"8379AC15-C52A-4F2E-D69C-08DAF9596B0B"
-              }
-            }
-          
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-             
-            }
-          }
-        }
-     }
-    },
-    "components": {
-      "schemas": {
-       
-        "VehicleRoutePlan": {
-          "type": "object",
-          "properties": {
-            "ProductTypeId": {
-              "type": "number",
-              "format": "number",
-              "example":1
-            },
-            "StartingPointId": {
-              "type": "number",
-              "format": "number",
-              "example":1
-            },
-            "MinimumMultiple": {
-              "type": "number",
-              "format": "number",
-              "example":100
-            },
-            "TankCapacity": {
-              "type": "number",
-              "format": "number",
-              "example":10000
-            },
-            "PlanDateTime":{
-              "type":"string",
-              "format":"string",
-              "example":"2023-08-12 09:50:05"
-            },
-            "DeliveryDateTime":{
-              "type":"string",
-              "format":"string",
-              "example":"2023-08-14 10:00:09"
-            },
-          
-            "DeliveryPlanId": {
-              "type": "number",
-              "format": "number",
-              "example":null
-            },
-            "OfficeIdList": {
-              "type": "object",
-              "format": "string",
-              "example":["873F01B0-3AF7-4963-4C75-08DB2523436A","E048CE16-E666-401E-4C76-08DB2523436A"]
             }
           }
         },
-        "CustomerDetails": {
-          "type": "object",
-          "properties": {
-            "CustomerName": {
-              "type": "string",
-              "format": "string",
-              "example": "RAMJEET YADAV "
-            },
-            "MobileNo": {
-              "type": "string",
-              "format": "string",
-              "example":"7705874844"
-            },
-            "VehicleNo": {
-              "type": "string",
-              "format": "string"
-            }
-            
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
           }
         }
- 
+      }
+    },
+    "/api/v1/dashboard/dropdown_list/{UserId}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Dropdown list",
+        "parameters": [
+          {
+            "name": "UserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "8379AC15-C52A-4F2E-D69C-08DAF9596B0B"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/sales_list/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Sales list",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-10"
+            }
+          },
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/customer_list/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Existing Vs New Customer Graph",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-10"
+            }
+          },
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/total_sales/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Total Sales By Business Entity",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-30"
+            }
+          },
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "D5355D33-02CF-40B0-5246-08DA286D7F4A"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/sales_customer/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+      "post": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Customer Details",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-30"
+            }
+          },
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "D5355D33-02CF-40B0-5246-08DA286D7F4A"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 6
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Vehicle Route Plan Post Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerDetails"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/payment/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get PaymentMode list",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-07-10"
+            }
+          },
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "06D5DDA0-6834-4EA1-183D-08DAF95AD4EF"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/card_details_list/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Card Details list (UserCounts, OfficeCounts, Last 7 days Sales & Expense, Current Sales & Expense)",
+        "parameters": [
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/godowntype/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get GodownType list (Tank,General,Reserver)",
+        "parameters": [
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/godown_details_list/{OfficeId}/{IsAdmin}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Godown Stock Details",
+        "parameters": [
+          {
+            "name": "OfficeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "46A1C7B7-6885-4F74-7ADE-08DAFE23C727"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/userdetails/{UserId}": {
+      "get": {
+        "tags": [
+          "User Details"
+        ],
+        "summary": "Get User Details",
+        "parameters": [
+          {
+            "name": "UserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "8379AC15-C52A-4F2E-D69C-08DAF9596B0B"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VehicleRoutePlan": {
+        "type": "object",
+        "properties": {
+          "ProductTypeId": {
+            "type": "number",
+            "format": "number",
+            "example": 1
+          },
+          "StartingPointId": {
+            "type": "number",
+            "format": "number",
+            "example": 1
+          },
+          "MinimumMultiple": {
+            "type": "number",
+            "format": "number",
+            "example": 100
+          },
+          "TankCapacity": {
+            "type": "number",
+            "format": "number",
+            "example": 10000
+          },
+          "PlanDateTime": {
+            "type": "string",
+            "format": "string",
+            "example": "2023-08-12 09:50:05"
+          },
+          "DeliveryDateTime": {
+            "type": "string",
+            "format": "string",
+            "example": "2023-08-14 10:00:09"
+          },
+          "DeliveryPlanId": {
+            "type": "number",
+            "format": "number",
+            "example": null
+          },
+          "OfficeIdList": {
+            "type": "object",
+            "format": "string",
+            "example": [
+              "873F01B0-3AF7-4963-4C75-08DB2523436A",
+              "E048CE16-E666-401E-4C76-08DB2523436A"
+            ]
+          },
+          "SpeedOfVehicle": {
+            "type": "number",
+            "format": "number",
+            "example": null
+          },
+          "StoppageUnloadingTime": {
+            "type": "number",
+            "format": "number",
+            "example": null
+          },
+          "ExtraUnloadingTime": {
+            "type": "number",
+            "format": "number",
+            "example": null
+          }
+        }
+      },
+      "CustomerDetails": {
+        "type": "object",
+        "properties": {
+          "CustomerName": {
+            "type": "string",
+            "format": "string",
+            "example": "RAMJEET YADAV "
+          },
+          "MobileNo": {
+            "type": "string",
+            "format": "string",
+            "example": "7705874844"
+          },
+          "VehicleNo": {
+            "type": "string",
+            "format": "string"
+          }
+        }
       }
     }
   }
+}
