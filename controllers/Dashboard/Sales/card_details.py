@@ -459,8 +459,8 @@ def CardDetails(office_id,is_admin,cnxn):
 
     today_date = pd.to_datetime('today').date()
     previous_date = today_date
-    previous_7_date = today_date - pd.DateOffset(days=7)
-    previous_14_date = today_date - pd.DateOffset(days=14)
+    previous_7_date = today_date - pd.DateOffset(days=6)
+    previous_14_date = today_date - pd.DateOffset(days=13)
     incomeDetailsCurrentDay_total=0
     incomeDetailsCurrentDay_count=0
     expenseDetailsCurrentDay_total=0

@@ -345,28 +345,29 @@ def CustomerAnalytics(Sales_df1):
         Sales_df1['CustomerName']=Sales_df1['CustomerName'].str.upper().str.strip()
         Sales_df1['VehicleNo']=Sales_df1['VehicleNo'].str.upper().str.replace(' ','')
 
-        rfmTable = Sales_df1.groupby('MobileNo',as_index=False).agg({'incomeDate': lambda x: (NOW - x.max()).days, 'InvoiceNo': lambda x: len(x), 'totalIncome': lambda x: x.sum(),'VehicleNo':lambda x: list(set(x)),'CustomerName':lambda x: list(set(x))})
+        rfmTable = Sales_df1.groupby('MobileNo',as_index=False).agg({'incomeDate': lambda x: (NOW - x.max()).days, 'InvoiceNo': lambda x: len(x), 'totalIncome': lambda x: x.sum(),'VehicleNo':lambda x: list(filter(None,list(set(x)))),'CustomerName':lambda x: list(filter(None,list(set(x))))})
         rfmTable['incomeDate'] = rfmTable['incomeDate'].astype(int)
-        rfmTable.rename(columns={'incomeDate': 'recency',
-                                'InvoiceNo': 'frequency',
-                                'totalIncome': 'monetary_value'}, inplace=True)
+        rfmTable.rename(columns={'incomeDate': 'Last Visit',
+                                'InvoiceNo': 'Frequency',
+                                'totalIncome': 'Sales',
+                                'CustomerName':'Name'}, inplace=True)
         
         quantiles = rfmTable.quantile(q=[0.25,0.5,0.75])
         quantiles = quantiles.to_dict()
         segmented_rfm = rfmTable
-        segmented_rfm['r_quartile'] = segmented_rfm['recency'].apply(RScore, args=('recency',quantiles,))
-        segmented_rfm['f_quartile'] = segmented_rfm['frequency'].apply(FMScore, args=('frequency',quantiles,))
-        segmented_rfm['m_quartile'] = segmented_rfm['monetary_value'].apply(FMScore, args=('monetary_value',quantiles,))
+        segmented_rfm['r_quartile'] = segmented_rfm['Last Visit'].apply(RScore, args=('Last Visit',quantiles,))
+        segmented_rfm['f_quartile'] = segmented_rfm['Frequency'].apply(FMScore, args=('Frequency',quantiles,))
+        segmented_rfm['m_quartile'] = segmented_rfm['Sales'].apply(FMScore, args=('Sales',quantiles,))
 
         segmented_rfm['RFMScore'] = segmented_rfm.r_quartile.map(str) + segmented_rfm.f_quartile.map(str) + segmented_rfm.m_quartile.map(str)
     except:
         print("No Data for Customer Analytics")
-    return {'BestCustomers':segmented_rfm[segmented_rfm['RFMScore']=='111'].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'LoyalCustomers':segmented_rfm[segmented_rfm['f_quartile']==1].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'BigSpenders':segmented_rfm[segmented_rfm['m_quartile']==1].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'AlmostLost':segmented_rfm[segmented_rfm['RFMScore']=='311'].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'LostCustomers':segmented_rfm[segmented_rfm['RFMScore']=='411'].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-          'LostCheapCustomers':segmented_rfm[segmented_rfm['RFMScore']=='444'].sort_values('monetary_value', ascending=False)[["CustomerName","MobileNo","VehicleNo","recency","frequency","monetary_value"]].to_dict(orient='records') if len(segmented_rfm)>0 else []
+    return {'Best Customers':segmented_rfm[segmented_rfm['RFMScore']=='111'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Loyal Customers':segmented_rfm[segmented_rfm['f_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Big Spenders':segmented_rfm[segmented_rfm['m_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Almost Lost':segmented_rfm[segmented_rfm['RFMScore']=='311'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Lost Customers':segmented_rfm[segmented_rfm['RFMScore']=='411'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+          'Lost Cheap Customers':segmented_rfm[segmented_rfm['RFMScore']=='444'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else []
     }
 
 def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
