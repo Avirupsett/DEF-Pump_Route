@@ -447,6 +447,30 @@
           }
         }
       }
+    },
+    "/api/v1/dashboard/driver/metrics/{DriverId}": {
+      "get": {
+        "tags": [
+          "Driver Dashboard"
+        ],
+        "summary": "Get Driver Details",
+        "parameters": [
+          {
+            "name": "DriverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "E9C62D84-57FE-4215-D69F-08DAF9596B0B"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

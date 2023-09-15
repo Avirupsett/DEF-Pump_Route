@@ -22,6 +22,7 @@ from controllers.Dashboard.User_Details.user import UserDetails
 from controllers.Dashboard.Sales.paymentmode import paymentMode
 from controllers.Filteration.filtration import Filtering
 from controllers.RouteFinding.Algo01 import Route_plan_without_priority
+from controllers.Dashboard.Driver.metrics import driver_metrics 
 
 from flask import Blueprint
 
@@ -341,6 +342,16 @@ def Userdetails(_UserId):
 
     cnxn = pyodbc.connect(ConnectionString)
     json = UserDetails(user_id,cnxn)
+    cnxn.close()
+    return jsonify(json)
+
+@route_page.route("/api/v1/dashboard/driver/metrics/<string:_DriverId>", methods=["GET"])
+def DriverMetrics(_DriverId):
+
+    driver_id = _DriverId
+
+    cnxn = pyodbc.connect(ConnectionString)
+    json = driver_metrics(driver_id,cnxn)
     cnxn.close()
     return jsonify(json)
 

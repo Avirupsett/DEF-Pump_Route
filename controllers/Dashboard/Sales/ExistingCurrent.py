@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime,date
+import numpy as np
 def PreviousCustomer_Traverse_list(office_id,from_date,level,cnxn):
     # start_time=time.time()
     Sales_df1=pd.read_sql_query(f'''
@@ -341,14 +342,20 @@ def CustomerAnalytics(Sales_df1):
         NOW=datetime(date.today().year,date.today().month,date.today().day)
         Sales_df1['incomeDate'] = pd.to_datetime(Sales_df1['incomeDate'])
         Sales_df1['MobileNo']=Sales_df1['MobileNo'].str.replace(' ','')
-        Sales_df1=Sales_df1[~((Sales_df1['MobileNo']=="")|(Sales_df1['MobileNo']=="0000"))]
         Sales_df1['CustomerName']=Sales_df1['CustomerName'].str.upper().str.strip()
         Sales_df1['VehicleNo']=Sales_df1['VehicleNo'].str.upper().str.replace(' ','')
+
+        Sales_df1['MobileNo']=np.where(~((Sales_df1['MobileNo']=="")|(Sales_df1['MobileNo']=="0000")),Sales_df1['MobileNo'],"_UnKnown"+Sales_df1['VehicleNo']+Sales_df1['CustomerName'])
+        Sales_df1['MobileNo']=np.where(((Sales_df1['MobileNo'].str.startswith('_UnKnown'))&(Sales_df1['VehicleNo']!="")&(Sales_df1['VehicleNo']!="XXX")),"_UnKnown"+Sales_df1['VehicleNo'],Sales_df1['MobileNo'])
+        
+        Sales_df1=Sales_df1[((Sales_df1["MobileNo"]!="")&(Sales_df1["VehicleNo"]!="")&(Sales_df1["VehicleNo"]!="XXX")&(Sales_df1["CustomerName"]!="")&(Sales_df1["CustomerName"]!="XXX"))]
+        # Sales_df1=Custom_MobileNo_df[~((Custom_MobileNo_df['MobileNo']=="")|(Custom_MobileNo_df['MobileNo']=="_UnKnown")|(Custom_MobileNo_df['MobileNo']=="0000"))]
+        # Sales_df1=Sales_df1[~((Sales_df1['MobileNo']=="")|(Sales_df1['MobileNo']=="0000"))]
 
         rfmTable = Sales_df1.groupby('MobileNo',as_index=False).agg({'incomeDate': lambda x: (NOW - x.max()).days, 'InvoiceNo': lambda x: len(x), 'totalIncome': lambda x: x.sum(),'VehicleNo':lambda x: list(filter(None,list(set(x)))),'CustomerName':lambda x: list(filter(None,list(set(x))))})
         rfmTable['incomeDate'] = rfmTable['incomeDate'].astype(int)
         rfmTable.rename(columns={'incomeDate': 'Last Visit',
-                                'InvoiceNo': 'Frequency',
+                                'InvoiceNo': 'Total Visits',
                                 'totalIncome': 'Sales',
                                 'CustomerName':'Name'}, inplace=True)
         
@@ -356,18 +363,19 @@ def CustomerAnalytics(Sales_df1):
         quantiles = quantiles.to_dict()
         segmented_rfm = rfmTable
         segmented_rfm['r_quartile'] = segmented_rfm['Last Visit'].apply(RScore, args=('Last Visit',quantiles,))
-        segmented_rfm['f_quartile'] = segmented_rfm['Frequency'].apply(FMScore, args=('Frequency',quantiles,))
+        segmented_rfm['f_quartile'] = segmented_rfm['Total Visits'].apply(FMScore, args=('Total Visits',quantiles,))
         segmented_rfm['m_quartile'] = segmented_rfm['Sales'].apply(FMScore, args=('Sales',quantiles,))
 
         segmented_rfm['RFMScore'] = segmented_rfm.r_quartile.map(str) + segmented_rfm.f_quartile.map(str) + segmented_rfm.m_quartile.map(str)
+        segmented_rfm['MobileNo'].mask(segmented_rfm['MobileNo'].str.startswith('_UnKnown'),'',inplace=True)
     except:
         print("No Data for Customer Analytics")
-    return {'Best Customers':segmented_rfm[segmented_rfm['RFMScore']=='111'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'Loyal Customers':segmented_rfm[segmented_rfm['f_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'Big Spenders':segmented_rfm[segmented_rfm['m_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'Almost Lost':segmented_rfm[segmented_rfm['RFMScore']=='311'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-           'Lost Customers':segmented_rfm[segmented_rfm['RFMScore']=='411'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
-          'Lost Cheap Customers':segmented_rfm[segmented_rfm['RFMScore']=='444'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Frequency","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else []
+    return {'Most Valuable Customers':segmented_rfm[segmented_rfm['RFMScore']=='111'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Most Frequent Customers':segmented_rfm[segmented_rfm['f_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Big Buyers':segmented_rfm[segmented_rfm['m_quartile']==1].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Non Follow-Up Customers':segmented_rfm[segmented_rfm['RFMScore']=='311'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+           'Former Customers':segmented_rfm[segmented_rfm['RFMScore']=='411'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else [],
+          'Former Low-Value Customers':segmented_rfm[segmented_rfm['RFMScore']=='444'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else []
     }
 
 def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
