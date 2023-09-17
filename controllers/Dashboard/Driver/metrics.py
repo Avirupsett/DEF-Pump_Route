@@ -86,6 +86,7 @@ def driver_metrics(driverid,cnxn):
     driverLicenceNo=driver_profile.loc[0,"LicenceNo"] # Driver LicenceNo
     driverContactNo=driver_profile.loc[0,"ContactNumber"] # Driver ContactNo
     date_format = "%Y-%m-%d %H:%M:%S"
+    tripMap=[]
     
     try:
         if (len(driver_df1)>0):
@@ -149,6 +150,8 @@ def driver_metrics(driverid,cnxn):
                         SELECT
                         dpd.DeliveredQuantity,
                         dpd.ApprovedQuantity,
+                        dpd.DeliveredAt,
+                        o.OfficeId,
                         o.OfficeName,
                         o.OfficeAddress,
                         o.Latitude As OfficeLatitude,
@@ -162,6 +165,26 @@ def driver_metrics(driverid,cnxn):
                         Where dpd.DeliveryPlanId={deliveryPlanId}
 
                         ''',cnxn)
+                    
+                    current_trip=driver_df1[driver_df1['DeliveryTrackerStatusId']==2]['OfficeId'].drop_duplicates().tolist()
+                    planned_trip=deliveryPlanDetails["OfficeId"].tolist()
+                    
+                    for i in range(len(planned_trip)):
+                        if deliveryPlanDetails.loc[i,"OfficeId"] in current_trip:
+                            tripMap.append({
+                                "Status":"Delivered",
+                                "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
+                                "Quantity":deliveryPlanDetails.loc[i,"DeliveredQuantity"],
+                                "DeliveredTime":deliveryPlanDetails.loc[i,"DeliveredAt"].strftime(date_format),
+                            })
+                        else:
+                            tripMap.append({
+                                    "Status":"Pending",
+                                    "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
+                                    "Quantity":deliveryPlanDetails.loc[i,"ApprovedQuantity"],
+                                    "DeliveredTime":None,
+                                })
+
                     
                     totalTankFuel=deliveryPlanDetails['ApprovedQuantity'].sum() # Total Tank fuel
                     fuelUnloaded=driver_df1[driver_df1['DeliveryTrackerStatusId']==2][['OfficeId','DeliveredQuantity']].drop_duplicates()["DeliveredQuantity"].sum() # Fuel Unloaded
@@ -194,7 +217,8 @@ def driver_metrics(driverid,cnxn):
             "totalJob":int(totalJob),
             "jobCompleted":int(jobCompleted)
         },
-        "prevJourney":prev_journey
+        "prevJourney":prev_journey,
+        "myTrip":tripMap
     }
 
 
