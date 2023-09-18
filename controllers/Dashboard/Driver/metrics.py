@@ -87,6 +87,7 @@ def driver_metrics(driverid,cnxn):
     driverContactNo=driver_profile.loc[0,"ContactNumber"] # Driver ContactNo
     date_format = "%Y-%m-%d %H:%M:%S"
     tripMap=[]
+    prev_journey=[]
     
     try:
         if (len(driver_df1)>0):
@@ -99,7 +100,7 @@ def driver_metrics(driverid,cnxn):
             alltime_df1.reset_index(inplace=True,drop=True)
 
             plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
-            prev_journey=[]
+            
             for i in plan_index:
                 temp_df=alltime_df1[:i+1]
                 temp_df.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
