@@ -16,6 +16,7 @@ from controllers.Dashboard.Sales.ExistingCurrent import ExistingCurrentCustomer
 from controllers.Dashboard.Sales.sales_customer import total_sales_based_on_customer
 from controllers.Dashboard.Sales.total_sales import total_sales
 from controllers.Dashboard.Sales.card_details import CardDetails
+from controllers.Dashboard.Sales.luxus_detail import luxusDetails
 from controllers.Dashboard.Godown_stocks.godown_list import Godown_list
 from controllers.Dashboard.Godown_stocks.godownType_list import GodownType
 from controllers.Dashboard.User_Details.user import UserDetails
@@ -321,6 +322,17 @@ def payment_details(_FromDate,_ToDate,_OfficeId,_IsAdmin):
 
     cnxn = pyodbc.connect(ConnectionString)
     json = paymentMode(office_id,is_admin,from_date,to_date,cnxn)
+    cnxn.close()
+    return json
+
+@route_page.route("/api/v1/dashboard/luxus/<string:_FromDate>/<string:_ToDate>", methods=["GET"])
+def luxus_details(_FromDate,_ToDate):
+
+    from_date = _FromDate
+    to_date = _ToDate
+
+    cnxn = pyodbc.connect(ConnectionString)
+    json = luxusDetails(from_date,to_date,cnxn)
     cnxn.close()
     return json
 

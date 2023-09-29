@@ -272,6 +272,40 @@
         }
       }
     },
+    "/api/v1/dashboard/luxus/{FromDate}/{ToDate}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get Luxus Dashboard",
+        "parameters": [
+          {
+            "name": "FromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-08-01"
+            }
+          },
+          {
+            "name": "ToDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-08-30"
+            }
+          }
+        ],
+        
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/dashboard/payment/{FromDate}/{ToDate}/{OfficeId}/{IsAdmin}": {
       "get": {
         "tags": [
