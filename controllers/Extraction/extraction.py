@@ -210,8 +210,8 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     df["requirement%"]=df["atDeliveryRequirement"]/df["totalCapacity"]*100
     df["requirement%"].fillna(0,inplace=True)
     df["atDeliveryRequirement"]= (df["atDeliveryRequirement"]//minimum_multiple)*minimum_multiple
-    df["currentStock"]=df["currentStock"]-df["avgSales"]*No_of_days_for_delivery
-    df["availableQuantity"]=df["totalCapacity"]-df["currentStock"]
+    # df["currentStock"]=df["currentStock"]-df["avgSales"]*No_of_days_for_delivery
+    df["availableQuantity"]=df["totalCapacity"]-(df["currentStock"]-df["avgSales"]*No_of_days_for_delivery)
     df["atDeliveryRequirement"].replace(to_replace=0, value=minimum_multiple, inplace=True)
     
     df.sort_values(by="requirement%", inplace=True, ascending=False)
@@ -237,8 +237,8 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     Not_selected["requirement%"]=Not_selected["atDeliveryRequirement"]/Not_selected["totalCapacity"]*100
     Not_selected["requirement%"].fillna(0,inplace=True)
     Not_selected["atDeliveryRequirement"]= (Not_selected["atDeliveryRequirement"]//minimum_multiple)*minimum_multiple
-    Not_selected["currentStock"]=Not_selected["currentStock"]-Not_selected["avgSales"]*No_of_days_for_delivery
-    Not_selected["availableQuantity"]=Not_selected["totalCapacity"]-Not_selected["currentStock"]
+    # Not_selected["currentStock"]=Not_selected["currentStock"]-Not_selected["avgSales"]*No_of_days_for_delivery
+    Not_selected["availableQuantity"]=Not_selected["totalCapacity"]-(Not_selected["currentStock"]-Not_selected["avgSales"]*No_of_days_for_delivery)
     Not_selected["atDeliveryRequirement"].replace(to_replace=0, value=minimum_multiple, inplace=True)
                                      
     

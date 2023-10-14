@@ -67,12 +67,32 @@ def deliveriesCount(df,from_date,to_date):
 
     return alldata
 
+def OfficeWiseSales(from_date,to_date,cnxn):
+    df=pd.read_sql_query(f'''
+    SELECT
+    o.officeId,
+    o.officeName,
+    SUM(S.total) AS total,
+    SUM(S.quantity) AS quantity
+	
+    FROM Office O
+
+    INNER JOIN Sales S ON S.isDeleted=0 AND O.officeId=S.officeId AND O.IsActive=1
+    WHERE S.InvoiceDate BETWEEN '{from_date}' AND '{to_date}'
+    GROUP BY o.OfficeId, o.officeName
+
+    ORDER BY total DESC''',cnxn)
+
+    return {"top5":df.head(5).to_dict(orient='records'),"bottom5":df.tail(5).to_dict(orient='records'),"top10":df.head(10).to_dict(orient='records'),"bottom10":df.tail(10).to_dict(orient='records')}
+
 def luxusDetails(from_date,to_date,cnxn):
     df=query_deliveries(from_date,to_date,cnxn)
     graph1=deliveriesByHub(df)
     graph2=deliveriesCount(df,from_date,to_date)
+    graph3=OfficeWiseSales(from_date,to_date,cnxn)
 
     return {
         "graph1":graph1,
-        "graph2":graph2
+        "graph2":graph2,
+        "graph3":graph3
     }

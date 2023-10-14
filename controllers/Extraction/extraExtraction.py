@@ -110,8 +110,8 @@ FROM
         Unselected_df["requirement%"]=Unselected_df["atDeliveryRequirement"]/Unselected_df["totalCapacity"]*100
         Unselected_df["requirement%"].fillna(0,inplace=True)
         Unselected_df["atDeliveryRequirement"]= (Unselected_df["atDeliveryRequirement"]//minimum_multiple)*minimum_multiple
-        Unselected_df["currentStock"]=Unselected_df["currentStock"]-Unselected_df["avgSales"]*No_of_days_for_delivery
-        Unselected_df["availableQuantity"]=Unselected_df["totalCapacity"]-Unselected_df["currentStock"]
+        # Unselected_df["currentStock"]=Unselected_df["currentStock"]-Unselected_df["avgSales"]*No_of_days_for_delivery
+        Unselected_df["availableQuantity"]=Unselected_df["totalCapacity"]-(Unselected_df["currentStock"]-Unselected_df["avgSales"]*No_of_days_for_delivery)
         Unselected_df["atDeliveryRequirement"].replace(to_replace=0, value=minimum_multiple, inplace=True)
                                         
         

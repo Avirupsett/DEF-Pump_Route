@@ -116,6 +116,7 @@ def driver_metrics(driverid,cnxn):
                 alltime_journey+=temp_df["Distance"].sum()
                 alltime_drivingTime+=temp_df[temp_df["Distance"]!=0]["Time"].sum()
                 alltime_idleTime+=temp_df[temp_df["Distance"]==0]["Time"].sum()
+
                 if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
                     res.append(startPoint)
                 prev_journey.append(
@@ -133,6 +134,7 @@ def driver_metrics(driverid,cnxn):
                 )
 
             driver_df1=driver_df1[driver_df1["DeliveryPlanId"]==driver_df1.loc[0,"DeliveryPlanId"]]
+            alltime_averageSpeed=alltime_journey/alltime_drivingTime
             
             if driver_df1[driver_df1["DeliveryTrackerStatusId"]==1]["DeliveryTrackerStatusId"].any():
                 start_index=driver_df1.index.get_loc(driver_df1[driver_df1["DeliveryTrackerStatusId"]==1].index[0])+1
@@ -197,6 +199,11 @@ def driver_metrics(driverid,cnxn):
                     drivingHours=driver_df1[driver_df1["Distance"]!=0]["Time"].sum() # Driving Hours
                     idleTime=driver_df1[driver_df1["Distance"]==0]["Time"].sum() # Idle Time
                     averageSpeed=distanceCovered/drivingHours # Average Speed
+
+                    alltime_journey+=distanceCovered
+                    alltime_drivingTime+=drivingHours
+                    alltime_idleTime+=idleTime
+                    alltime_averageSpeed=alltime_journey/alltime_drivingTime
     except:
         print("Driver Metrics Error")
 
@@ -219,7 +226,13 @@ def driver_metrics(driverid,cnxn):
             "jobCompleted":int(jobCompleted)
         },
         "prevJourney":prev_journey,
-        "myTrip":tripMap
+        "myTrip":tripMap,
+        "alltime":{
+            "distanceCovered":float(alltime_journey),
+            "drivingTime":float(alltime_drivingTime),
+            "idleTime":float(alltime_idleTime),
+            "averageSpeed":float(alltime_averageSpeed)
+        }
     }
 
 
