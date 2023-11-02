@@ -1,2 +1,2 @@
 
-ConnectionString="Driver={ODBC Driver 17 for SQL Server};Server=115.124.120.251;Database=DEF_DB;uid=apiUser;pwd=User@123"
+ConnectionString="Driver={ODBC Driver 17 for SQL Server};Server=209.126.0.236;Database=DEV_DEF_DB;uid=devuser;pwd=Host@123"

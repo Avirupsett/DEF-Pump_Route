@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime,date
 import numpy as np
+
 def PreviousCustomer_Traverse_list(office_id,from_date,level,cnxn):
     # start_time=time.time()
     Sales_df1=pd.read_sql_query(f'''
@@ -378,8 +379,179 @@ def CustomerAnalytics(Sales_df1):
           'Former Low-Value Customers':segmented_rfm[segmented_rfm['RFMScore']=='444'].sort_values('Sales', ascending=False)[["Name","MobileNo","VehicleNo","Last Visit","Total Visits","Sales"]].to_dict(orient='records') if len(segmented_rfm)>0 else []
     }
 
+def get_month(x):
+    return datetime(int(x.year), int(x.month), 1)
+
+def get_date_int(df, column):
+    year = df[column].dt.year
+    month = df[column].dt.month
+    date = df[column].dt.date
+    return year, month, date
+def MonthlyRecurringCustomer(Sales_df1):
+    Sales_df1['CustomerName']=Sales_df1['CustomerName'].str.upper().str.strip()
+    Sales_df1['VehicleNo']=Sales_df1['VehicleNo'].str.upper().str.strip()
+    Sales_df1["MobileNo"]=Sales_df1["MobileNo"].str.replace(' ', '')
+
+    Sales_df1['MobileNo']=np.where(~((Sales_df1['MobileNo']=="")|(Sales_df1['MobileNo']=="0000")),Sales_df1['MobileNo'],"_UnKnown"+Sales_df1['VehicleNo']+Sales_df1['CustomerName'])
+    Sales_df1['MobileNo']=np.where(((Sales_df1['MobileNo'].str.startswith('_UnKnown'))&(Sales_df1['VehicleNo']!="")&(Sales_df1['VehicleNo']!="XXX")),"_UnKnown"+Sales_df1['VehicleNo'],Sales_df1['MobileNo'])
+
+    Sales_df1.dropna(inplace=True,subset=['incomeDate'],axis=0)
+    if len(Sales_df1)==0:
+        return []
+    Sales_df1['InvoiceMonth'] = Sales_df1['incomeDate'].apply(get_month)
+
+    grouping = Sales_df1.groupby('MobileNo')['InvoiceMonth']
+    Sales_df1['CohortMonth'] = grouping.transform('min')
+
+    Invoice_Year, Invoice_Month, _ = get_date_int(Sales_df1, 'InvoiceMonth')
+    Cohort_Year, Cohort_Month , _ = get_date_int(Sales_df1, 'CohortMonth')
+    Year_Diff = Invoice_Year - Cohort_Year
+    Month_Diff = Invoice_Month - Cohort_Month
+    Sales_df1['CohortIndex'] = Year_Diff*12 + Month_Diff +1
+
+    grouping = Sales_df1.groupby(['CohortMonth', 'CohortIndex'])
+    cohort_data = grouping['MobileNo'].apply(pd.Series.nunique)
+    cohort_data = cohort_data.reset_index()
+
+    cohort_counts = cohort_data.pivot(index="CohortMonth",
+                                  columns="CohortIndex",
+                                  values="MobileNo")
+    retention = cohort_counts
+    cohort_sizes = cohort_counts.iloc[:,0]
+    retention = cohort_counts.divide(cohort_sizes, axis=0)
+    retention=retention.round(3)*100
+
+    datetime_index = retention.index
+    formatted_dates = [date.strftime('%b %Y') for date in datetime_index]
+
+    df=retention.reset_index(drop=True)
+    df.fillna(0,inplace=True)
+
+    # Initialize an empty list to store the result
+    result = []
+
+    # Loop through the DataFrame to create the desired format
+    for row_index, row in df[::-1].iterrows():
+        for col_index, value in enumerate(row):
+            rounded_value = round(value)
+            result.append([df.shape[0]-row_index-1, col_index, rounded_value])
+
+    return {'data':result,'formatted_dates':formatted_dates[::-1],'cohort_index':[i for i in range(1,df.shape[1]+1)]}
+
+def get_day(x):
+    return x.date
+
+def RecurringCustomerDaily(Sales_df1):
+    Sales_df1['CustomerName'] = Sales_df1['CustomerName'].str.upper().str.strip()
+    Sales_df1['VehicleNo'] = Sales_df1['VehicleNo'].str.upper().str.strip()
+    Sales_df1["MobileNo"] = Sales_df1["MobileNo"].str.replace(' ', '')
+
+    Sales_df1['MobileNo'] = np.where(~((Sales_df1['MobileNo'] == "") | (Sales_df1['MobileNo'] == "0000")), Sales_df1['MobileNo'], "_UnKnown" + Sales_df1['VehicleNo'] + Sales_df1['CustomerName'])
+    Sales_df1['MobileNo'] = np.where(((Sales_df1['MobileNo'].str.startswith('_UnKnown')) & (Sales_df1['VehicleNo'] != "") & (Sales_df1['VehicleNo'] != "XXX")), "_UnKnown" + Sales_df1['VehicleNo'], Sales_df1['MobileNo'])
+    
+    Sales_df1.dropna(inplace=True,subset=['incomeDate'],axis=0)
+    if len(Sales_df1)==0:
+        return []
+    Sales_df1['InvoiceDay'] = Sales_df1['incomeDate']
+
+    grouping = Sales_df1.groupby('MobileNo')['InvoiceDay']
+    Sales_df1['CohortDay'] = grouping.transform('min')
+
+    Invoice_Year, Invoice_Month, Invoice_Day = get_date_int(Sales_df1, 'InvoiceDay')
+    Cohort_Year, Cohort_Month, Cohort_Day = get_date_int(Sales_df1, 'CohortDay')
+    Year_Diff = Invoice_Year - Cohort_Year
+    Month_Diff = Invoice_Month - Cohort_Month
+    Day_Diff = Invoice_Day - Cohort_Day
+
+    Sales_df1['CohortIndex'] = Year_Diff * 365 + Month_Diff * 30 + Day_Diff.dt.days + 1
+
+    grouping = Sales_df1.groupby(['CohortDay', 'CohortIndex'])
+    cohort_data = grouping['MobileNo'].apply(pd.Series.nunique)
+    cohort_data = cohort_data.reset_index()
+
+    cohort_counts = cohort_data.pivot(index="CohortDay",
+                                      columns="CohortIndex",
+                                      values="MobileNo")
+    retention = cohort_counts
+    cohort_sizes = cohort_counts.iloc[:, 0]
+    retention = cohort_counts.divide(cohort_sizes, axis=0)
+    retention = retention.round(3) * 100
+
+    datetime_index = retention.index
+    formatted_dates = [date.strftime('%b %d, %Y') for date in datetime_index]
+
+    df = retention.reset_index(drop=True)
+    df.fillna(0, inplace=True)
+
+    # Initialize an empty list to store the result
+    result = []
+
+    # Loop through the DataFrame to create the desired format
+    for row_index, row in df[::-1].iterrows():
+        for col_index, value in enumerate(row):
+            rounded_value = round(value)
+            result.append([df.shape[0] - row_index - 1, col_index, rounded_value])
+
+    return {'data': result, 'formatted_dates': formatted_dates[::-1], 'cohort_index': [i for i in range(1, df.shape[1] + 1)]}
+
+def get_year(x):
+    return datetime(x.year, 1, 1)
+
+def RecurringCustomerYearly(Sales_df1):
+    Sales_df1['CustomerName'] = Sales_df1['CustomerName'].str.upper().str.strip()
+    Sales_df1['VehicleNo'] = Sales_df1['VehicleNo'].str.upper().str.strip()
+    Sales_df1["MobileNo"] = Sales_df1["MobileNo"].str.replace(' ', '')
+
+    Sales_df1['MobileNo'] = np.where(~((Sales_df1['MobileNo'] == "") | (Sales_df1['MobileNo'] == "0000")), Sales_df1['MobileNo'], "_UnKnown" + Sales_df1['VehicleNo'] + Sales_df1['CustomerName'])
+    Sales_df1['MobileNo'] = np.where((Sales_df1['MobileNo'].str.startswith('_UnKnown')) & (Sales_df1['VehicleNo'] != "") & (Sales_df1['VehicleNo'] != "XXX"), "_UnKnown" + Sales_df1['VehicleNo'], Sales_df1['MobileNo'])
+    
+    Sales_df1.dropna(inplace=True,subset=['incomeDate'],axis=0)
+    if len(Sales_df1)==0:
+        return []
+    Sales_df1['InvoiceYear'] = Sales_df1['incomeDate'].apply(get_year)
+
+    grouping = Sales_df1.groupby('MobileNo')['InvoiceYear']
+    Sales_df1['CohortYear'] = grouping.transform('min')
+
+    Invoice_Year, _, _ = get_date_int(Sales_df1, 'InvoiceYear')
+    Cohort_Year, _, _ = get_date_int(Sales_df1, 'CohortYear')
+    Year_Diff = Invoice_Year - Cohort_Year
+    Sales_df1['CohortIndex'] = Year_Diff + 1
+
+    grouping = Sales_df1.groupby(['CohortYear', 'CohortIndex'])
+    cohort_data = grouping['MobileNo'].apply(pd.Series.nunique)
+    cohort_data = cohort_data.reset_index()
+
+    cohort_counts = cohort_data.pivot(index="CohortYear",
+                                      columns="CohortIndex",
+                                      values="MobileNo")
+    retention = cohort_counts
+    cohort_sizes = cohort_counts.iloc[:, 0]
+    retention = cohort_counts.divide(cohort_sizes, axis=0)
+    retention = retention.round(3) * 100
+
+    datetime_index = retention.index
+    formatted_dates = [date.strftime('%Y') for date in datetime_index]
+
+    df = retention.reset_index(drop=True)
+    df.fillna(0, inplace=True)
+
+    # Initialize an empty list to store the result
+    result = []
+
+    # Loop through the DataFrame to create the desired format
+    for row_index, row in df[::-1].iterrows():
+        for col_index, value in enumerate(row):
+            rounded_value = round(value)
+            result.append([df.shape[0] - row_index - 1, col_index, rounded_value])
+
+    return {'data': result, 'formatted_dates': formatted_dates[::-1], 'cohort_index': [i for i in range(1, df.shape[1] + 1)]}
+
 def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
     date_range=pd.date_range(from_date,to_date)
+    graph4=[]
+    graph5=[]
+    graph6=[]
 
     if is_admin==6:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,-1,cnxn)
@@ -387,6 +559,12 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
 
 
     elif is_admin==4:
@@ -397,6 +575,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
+
 
     elif is_admin==5:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,-1,cnxn)
@@ -404,6 +589,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
+
 
     elif is_admin==1:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,1,cnxn)
@@ -413,6 +605,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
+
 
     elif is_admin==3:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,1,cnxn)
@@ -423,6 +622,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
+
 
     elif is_admin==2:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,1,cnxn)
@@ -432,6 +638,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
+
 
     elif is_admin==0:
         Previous_df=PreviousCustomer_Traverse_list(office_id,from_date,1,cnxn)
@@ -441,7 +654,13 @@ def ExistingCurrentCustomer(office_id,is_admin,from_date,to_date,cnxn):
         graph1=ExistingCurrentCustomer_body(Previous_df,Current_df)
         graph2=ExistingCurrentCustomer_Daywise_body(Previous_df,Current_df,date_range)
         graph3=CustomerAnalytics(Current_df)
+        if(len(Current_df)>0):
+            graph4=MonthlyRecurringCustomer(Current_df)
+            if (pd.to_datetime(from_date).year != pd.to_datetime(to_date).year):
+                graph6=RecurringCustomerYearly(Current_df)
+            if(len(date_range)<=31):
+                graph5=RecurringCustomerDaily(Current_df)
 
-    return {"graph1":graph1,"graph2":graph2,"graph3":graph3}
+    return {"graph1":graph1,"graph2":graph2,"graph3":graph3,"graph4":{"MonthlyRecurringCustomer":graph4,"DaywiseRecurringCustomer":graph5,"YearlyRecurringCustomer":graph6}}
     
     

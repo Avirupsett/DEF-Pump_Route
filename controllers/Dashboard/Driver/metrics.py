@@ -20,7 +20,10 @@ def haversine(lat1, lon1, lat2, lon2):
     return distance
 
 def calculate_time_difference(start, end):
+  if(start is not pd.NaT and end is not pd.NaT):
     return (end - start).total_seconds() / 3600
+  else:
+    return 0
 
 def driver_metrics(driverid,cnxn):
 
@@ -107,7 +110,7 @@ def driver_metrics(driverid,cnxn):
                 temp_df[["Latitude(t+1)","Longitude(t+1)"]]=temp_df[["Latitude","Longitude"]].shift(periods=1)
                 temp_df["LocationUpdateTime(t+1)"]=temp_df["LocationUpdateTime"].shift(periods=1)
                 temp_df["Distance"]=temp_df.dropna(subset=["Latitude(t+1)","Longitude(t+1)","Latitude","Longitude"], how='any').apply(lambda row:haversine(row["Latitude"],row["Longitude"],row["Latitude(t+1)"],row["Longitude(t+1)"]), axis=1)
-                temp_df["Time"]=temp_df.dropna(subset=["LocationUpdateTime(t+1)","LocationUpdateTime"], how='any').apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
+                temp_df["Time"]=temp_df.apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
                 startPoint=temp_df.loc[0,"HubName"] # Start Point
                 office_list=temp_df[alltime_df1["DeliveryTrackerStatusId"]==2]["OfficeName"].dropna().tolist()
                 res = []
@@ -124,7 +127,7 @@ def driver_metrics(driverid,cnxn):
                         "distanceCovered":float(temp_df["Distance"].sum()), # Distance Covered
                         "drivingTime":float(temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Driving Time
                         "idleTime": float(temp_df[temp_df["Distance"]==0]["Time"].sum()), # Idle Time
-                        "averageSpeed":float(temp_df["Distance"].sum()/temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Average Speed
+                        "averageSpeed":float(temp_df["Distance"].sum()/temp_df[temp_df["Distance"]!=0]["Time"].sum()) if temp_df[temp_df["Distance"]!=0]["Time"].sum()!=0 else 0, # Average Speed
                         "containerSize":int(temp_df.loc[0,"ContainerSize"]), # Container Size
                         "deliveryPlanId":int(temp_df.loc[0,"DeliveryPlanId"]), # DeliveryPlan
                         "startTime":temp_df.loc[0,"LocationUpdateTime"].strftime(date_format),
@@ -144,7 +147,7 @@ def driver_metrics(driverid,cnxn):
                     driver_df1[["Latitude(t+1)","Longitude(t+1)"]]=driver_df1[["Latitude","Longitude"]].shift(periods=1)
                     driver_df1["LocationUpdateTime(t+1)"]=driver_df1["LocationUpdateTime"].shift(periods=1)
                     driver_df1["Distance"]=driver_df1.dropna(subset=["Latitude(t+1)","Longitude(t+1)","Latitude","Longitude"], how='any').apply(lambda row:haversine(row["Latitude"],row["Longitude"],row["Latitude(t+1)"],row["Longitude(t+1)"]), axis=1)
-                    driver_df1["Time"]=driver_df1.dropna(subset=["LocationUpdateTime(t+1)","LocationUpdateTime"], how='any').apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
+                    driver_df1["Time"]=driver_df1.apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
 
                     driver_df1.reset_index(inplace=True,drop=True)
                     deliveryPlanId=driver_df1.loc[0,"DeliveryPlanId"]
