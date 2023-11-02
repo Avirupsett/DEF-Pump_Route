@@ -201,12 +201,12 @@ def driver_metrics(driverid,cnxn):
                     distanceCovered=driver_df1[driver_df1["Distance"]!=0]["Distance"].sum() # Distance Covered
                     drivingHours=driver_df1[driver_df1["Distance"]!=0]["Time"].sum() # Driving Hours
                     idleTime=driver_df1[driver_df1["Distance"]==0]["Time"].sum() # Idle Time
-                    averageSpeed=distanceCovered/drivingHours # Average Speed
+                    averageSpeed=distanceCovered/drivingHours if drivingHours!=0 else 0 # Average Speed
 
                     alltime_journey+=distanceCovered
                     alltime_drivingTime+=drivingHours
                     alltime_idleTime+=idleTime
-                    alltime_averageSpeed=alltime_journey/alltime_drivingTime
+                    alltime_averageSpeed=alltime_journey/alltime_drivingTime if alltime_drivingTime!=0 else 0
     except:
         print("Driver Metrics Error")
 
