@@ -101,7 +101,7 @@ def create_post():
     # else:
     #     No_of_days_for_delivery = 0
 
-    if DeliveryPlanId:
+    if DeliveryPlanId and DeliveryPlanId!=0:
         (
             df,
             Starting_PointId,
