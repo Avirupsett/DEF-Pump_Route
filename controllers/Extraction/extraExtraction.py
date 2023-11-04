@@ -20,12 +20,12 @@ def ExtractingFromDeliveryPlan(DeliveryPlanId,cnxn,No_of_days_for_delivery):
     d.HubName,
     d.PlannedQuantity,d.CurrentQuantity,d.AvailableQuantity,d.ProductId,d.DeliveryLimit,
                          d.PlanDate,d.ExpectedDeliveryDate,d.DeliveryPlanStatusId,d.CreatedBy,d.UpdatedBy,d.CreatedOn,d.UpdatedOn,
-                         d.DeliveryPlanDetailsId,d.SequenceNo,d.AdminId,d.ReceivedQuantity,d.ApproveStatus,d.ApprovedQuantity,d.DeliveredQuantity,d.DeliveredAt
+                         d.DeliveryPlanDetailsId,d.SequenceNo,d.AdminId,d.ReceivedQuantity,d.DeliveryPlanDetailsStatusId,d.ApprovedQuantity,d.DeliveredQuantity,d.DeliveredAt
 FROM
     Office df
 
     Inner JOIN(
-    Select dpd.DeliveryPlanId,dpd.OfficeId,dpd.PlannedQuantity,dpd.CurrentQuantity,dpd.AvailableQuantity,dpd.ApproveStatus,
+    Select dpd.DeliveryPlanId,dpd.OfficeId,dpd.PlannedQuantity,dpd.CurrentQuantity,dpd.AvailableQuantity,dpd.DeliveryPlanDetailsStatusId,
     dp.StartPointId,dp.ContainerSize,M.Latitude As StartLatitude,
     M.Longitude As StartLongitude,M.HubName,dp.ProductId,dp.DeliveryLimit,
                          dp.PlanDate,dp.ExpectedDeliveryDate,dp.DeliveryPlanStatusId,dp.CreatedBy,dp.UpdatedBy,dp.CreatedOn,dp.UpdatedOn,
@@ -45,7 +45,7 @@ FROM
 	
     Where 
     dp.DeliveryPlanId={DeliveryPlanId} And
-    (ApproveStatus IS Null OR ApproveStatus!=-1)
+    (dpd.DeliveryPlanDetailsStatusId!=3)
         )As d
     On d.OfficeId=df.OfficeId  
 ;

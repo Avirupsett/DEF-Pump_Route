@@ -124,7 +124,7 @@ def create_post():
     )
         if (len(df)>0):
             df["DeliveredAt"]=pd.to_datetime(df["DeliveredAt"]).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df=pd.merge(optimal_route1[0],df[["officeId","AdminId","DeliveryPlanId","DeliveryPlanDetailsId","SequenceNo","ReceivedQuantity","ApprovedQuantity","DeliveryPlanStatusId","ApproveStatus","DeliveredQuantity","DeliveredAt"]],on="officeId",how="left")
+            df=pd.merge(optimal_route1[0],df[["officeId","AdminId","DeliveryPlanId","DeliveryPlanDetailsId","SequenceNo","ReceivedQuantity","ApprovedQuantity","DeliveryPlanStatusId","DeliveryPlanDetailsStatusId","DeliveredQuantity","DeliveredAt"]],on="officeId",how="left")
             df = df.replace({np.nan: None})
             time=0
             for i in range(len(df)):

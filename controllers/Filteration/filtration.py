@@ -2,6 +2,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 
 def Filtering(df,Tank_Capacity,No_of_days_for_delivery,minimum_multiple):
+    df[["avgSales","currentStock"]].fillna(0, inplace=True)
     df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery
     df.reset_index(inplace=True)
     for i in range(len(df)):

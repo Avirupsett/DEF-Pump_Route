@@ -9,7 +9,7 @@ def Extracting( Product_Type,cnxn):
     Begindate = Begindate.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
    
     df=pd.read_sql_query(f'''
-                         SELECT
+SELECT
     df.OfficeId,
         df.OfficeName,
     df.Longitude,
@@ -22,6 +22,7 @@ def Extracting( Product_Type,cnxn):
     FROM(
     SELECT
         o.OfficeId,
+        o.masterOfficeId,
         o.OfficeName,
         o.Longitude,
         o.Latitude,
@@ -71,7 +72,7 @@ su.OfficeId
         dp.ExpectedDeliveryDate,
         dp.ProductId,
         dpd.OfficeId,
-        dpd.ApproveStatus
+        dpd.DeliveryPlanDetailsStatusId
     FROM
 
         DeliveryPlan dp
@@ -84,8 +85,8 @@ su.OfficeId
         dp.ProductId = {Product_Type}
         AND dp.CreatedOn <= '{Begindate}'
         AND dp.ExpectedDeliveryDate >= '{Begindate}'
-        AND dp.DeliveryPlanStatusId <= 3
-        AND (dpd.ApproveStatus is NULL OR dpd.ApproveStatus!=-1)
+        AND (dp.DeliveryPlanStatusId < 3 )
+        AND ( dpd.DeliveryPlanDetailsStatusId!=3)
         )As d
 )  ;
  ''',cnxn)
