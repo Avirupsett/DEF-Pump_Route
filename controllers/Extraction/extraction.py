@@ -89,7 +89,7 @@ su.OfficeId
 
         WHERE
         dp.ProductId = {Product_Type}
-        AND ( dp.DeliveryPlanStatusId <= 6 AND dpd.ReceivedQuantity=0)
+        AND ( dp.DeliveryPlanStatusId <= 6 AND (dpd.ReceivedQuantity=0 OR dpd.ReceivedQuantity=NULL))
         AND ( dpd.DeliveryPlanDetailsStatusId!=3)
         )As d
 )  ;
