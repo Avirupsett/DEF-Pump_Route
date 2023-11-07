@@ -17,12 +17,16 @@ def ExtractingFromDeliveryPlan(DeliveryPlanId,cnxn,No_of_days_for_delivery):
 	d.StartLatitude,
 	d.StartLongitude,
 	d.DeliveryPlanId,
+    m.masterOfficeId,
+    m.OfficeName As masterOfficeName,
     d.HubName,
     d.PlannedQuantity,d.CurrentQuantity,d.AvailableQuantity,d.ProductId,d.DeliveryLimit,
                          d.PlanDate,d.ExpectedDeliveryDate,d.DeliveryPlanStatusId,d.CreatedBy,d.UpdatedBy,d.CreatedOn,d.UpdatedOn,
                          d.DeliveryPlanDetailsId,d.SequenceNo,d.AdminId,d.ReceivedQuantity,d.DeliveryPlanDetailsStatusId,d.ApprovedQuantity,d.DeliveredQuantity,d.DeliveredAt
 FROM
     Office df
+    LEFT JOIN
+       Office m ON m.OfficeId = df.masterOfficeId
 
     Inner JOIN(
     Select dpd.DeliveryPlanId,dpd.OfficeId,dpd.PlannedQuantity,dpd.CurrentQuantity,dpd.AvailableQuantity,dpd.DeliveryPlanDetailsStatusId,
@@ -118,6 +122,6 @@ FROM
         Unselected_df.sort_values(by="requirement%",inplace=True,ascending=False)
         Unselected_df.reset_index(drop=True,inplace=True)
 
-        return df,Starting_PointId,Starting_PointName,Starting_Point_latitude,Starting_Point_longitude,total_requirement,excess_capacity,Unselected_df[["officeName","latitude","longitude","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity"]].to_dict(orient="records"),minimum_multiple,PlanDate,ExpectedDeliveryDate,int(DeliveryPlanStatusId),CreatedBy,UpdatedBy,CreatedOn,UpdatedOn
+        return df,Starting_PointId,Starting_PointName,Starting_Point_latitude,Starting_Point_longitude,total_requirement,excess_capacity,Unselected_df[["officeName","latitude","longitude","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity","masterOfficeId","masterOfficeName"]].to_dict(orient="records"),minimum_multiple,PlanDate,ExpectedDeliveryDate,int(DeliveryPlanStatusId),CreatedBy,UpdatedBy,CreatedOn,UpdatedOn
     else:
         return df,0,0,0,0,0,0,[],None,None,None,None,None,None,None,None

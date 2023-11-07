@@ -13,8 +13,8 @@ def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitud
 
     distance_matrix = []
     # speed_of_vehicle=40
-    lat_lon_office=df[["latitude","longitude","officeName","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity"]]
-    lat_lon_office.loc[len(lat_lon_office.index)]=[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0]
+    lat_lon_office=df[["latitude","longitude","officeName","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity","masterOfficeId","masterOfficeName"]]
+    lat_lon_office.loc[len(lat_lon_office.index)]=[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0,None,None]
     lat_lon_office.reset_index(drop=True,inplace=True)
     distance_matrix = []
 

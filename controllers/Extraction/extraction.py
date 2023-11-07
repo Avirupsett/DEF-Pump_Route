@@ -17,12 +17,15 @@ SELECT
         df.ProductTypeId,
         df.CurrentStock,
         df.totalCapacity,
-        df.avgSales
+        df.avgSales,
+        df.masterOfficeId,
+        df.masterOfficeName
 
     FROM(
     SELECT
         o.OfficeId,
         o.masterOfficeId,
+        m.OfficeName As masterOfficeName,
         o.OfficeName,
         o.Longitude,
         o.Latitude,
@@ -32,6 +35,8 @@ SELECT
         s.avgSales
     FROM
         (Select * from Office Where IsActive=1) o
+    LEFT JOIN
+        Office m ON m.OfficeId = o.masterOfficeId
     LEFT JOIN
         CurrentStockDetails cs ON o.OfficeId = cs.OfficeId
     LEFT JOIN
@@ -72,7 +77,8 @@ su.OfficeId
         dp.ExpectedDeliveryDate,
         dp.ProductId,
         dpd.OfficeId,
-        dpd.DeliveryPlanDetailsStatusId
+        dpd.DeliveryPlanDetailsStatusId,
+        dpd.ReceivedQuantity
     FROM
 
         DeliveryPlan dp
@@ -83,9 +89,7 @@ su.OfficeId
 
         WHERE
         dp.ProductId = {Product_Type}
-        AND dp.CreatedOn <= '{Begindate}'
-        AND dp.ExpectedDeliveryDate >= '{Begindate}'
-        AND (dp.DeliveryPlanStatusId < 3 )
+        AND ( dp.DeliveryPlanStatusId <= 6 AND dpd.ReceivedQuantity=0)
         AND ( dpd.DeliveryPlanDetailsStatusId!=3)
         )As d
 )  ;
@@ -101,7 +105,6 @@ su.OfficeId
             },
             inplace=True,
         )
-
    
 
     # if totalCapacity value is 0 then replace it to 2000
@@ -136,9 +139,13 @@ def ExtractingFromOfficeId( Product_Type, OfficeList,cnxn,No_of_days_for_deliver
     cs.ProductTypeId,
     cs.CurrentStock,
     gm.totalCapacity,
-    s.avgSales
+    s.avgSales,
+    m.masterOfficeId,
+    m.OfficeName As masterOfficeName
 FROM
     (Select * from Office Where IsActive=1) o
+LEFT JOIN
+        Office m ON m.OfficeId = o.masterOfficeId
 LEFT JOIN
     CurrentStockDetails cs ON o.OfficeId = cs.OfficeId
 
@@ -246,4 +253,4 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     Not_selected.sort_values(by="requirement%",inplace=True,ascending=False)
     Not_selected.reset_index(drop=True,inplace=True)
 
-    return df,total_requirement,Not_selected[["officeName","latitude","longitude","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity"]]
+    return df,total_requirement,Not_selected[["officeName","latitude","longitude","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity","masterOfficeId","masterOfficeName"]]

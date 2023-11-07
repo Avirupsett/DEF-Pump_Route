@@ -38,6 +38,7 @@ def driver_metrics(driverid,cnxn):
     alltime_journey=0
     alltime_drivingTime=0
     alltime_idleTime=0
+    alltime_averageSpeed=0
 
     driver_df1=pd.read_sql_query(f'''
     SELECT
@@ -137,7 +138,7 @@ def driver_metrics(driverid,cnxn):
                 )
 
             driver_df1=driver_df1[driver_df1["DeliveryPlanId"]==driver_df1.loc[0,"DeliveryPlanId"]]
-            alltime_averageSpeed=alltime_journey/alltime_drivingTime
+            alltime_averageSpeed=alltime_journey/alltime_drivingTime if alltime_drivingTime>0 else 0
             
             if driver_df1[driver_df1["DeliveryTrackerStatusId"]==1]["DeliveryTrackerStatusId"].any():
                 start_index=driver_df1.index.get_loc(driver_df1[driver_df1["DeliveryTrackerStatusId"]==1].index[0])+1
