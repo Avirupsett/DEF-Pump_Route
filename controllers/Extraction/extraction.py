@@ -193,7 +193,6 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     df[["currentStock", "totalCapacity"]].fillna(0, inplace=True)
     df["totalCapacity"].replace(to_replace=0, value=2000, inplace=True)
 
-
     df["requirement%"] = (
         abs(df["totalCapacity"] - df["currentStock"]) / df["totalCapacity"]
     ) * 100
@@ -203,7 +202,7 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
 
     df["requirement%"].fillna(0, inplace=True)
     df["avgSales"].fillna(0, inplace=True)
-    df.dropna(inplace=True)
+    # df.dropna(inplace=True)
 
     df["atDeliveryRequirement"]=df["totalCapacity"]-df["currentStock"]+df["avgSales"]*No_of_days_for_delivery 
     df.reset_index(inplace=True)
@@ -228,6 +227,7 @@ o.OfficeId IN {tuple(OfficeList) if len(OfficeList)>1 else f"('{OfficeList[0]}')
     total_requirement=df['atDeliveryRequirement'].dropna().sum()
 
     df2=Extracting( Product_Type,cnxn)
+    
     office_list=df["officeId"].to_list()
     Not_selected=df2[~df2["officeId"].isin(office_list)]
 

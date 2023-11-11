@@ -12,9 +12,17 @@ from datetime import datetime, timedelta
 def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitude,startingLongitude,startTime,speed_of_vehicle):
 
     distance_matrix = []
+        
     # speed_of_vehicle=40
     lat_lon_office=df[["latitude","longitude","officeName","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity","masterOfficeId","masterOfficeName"]]
     lat_lon_office.loc[len(lat_lon_office.index)]=[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0,None,None]
+
+    # If No Office Is Selected then it will only provide the starting point and ending point
+    if(len(df)==0):
+        start_end=[[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0,None,None,startTime,0],[startingLatitude,startingLongitude,startingPoint,0,startingPointId,0,0,0,None,None,startTime,0]]
+        temp=pd.DataFrame(start_end,columns=["latitude","longitude","officeName","atDeliveryRequirement","officeId","totalCapacity","currentStock","availableQuantity","masterOfficeId","masterOfficeName","estimatedDeliveryTime","distance"])
+        return(temp,0)
+    
     lat_lon_office.reset_index(drop=True,inplace=True)
     distance_matrix = []
 
