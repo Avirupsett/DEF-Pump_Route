@@ -174,6 +174,7 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
             (dpd.DeliveryPlanDetailsStatusId!=3)
                 )As d
             On d.OfficeId=df.OfficeId  
+            Order By dpd.SequenceNo
         ;
                          ''',cnxn)
     

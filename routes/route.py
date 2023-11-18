@@ -229,6 +229,10 @@ def DriverRoute():
     DeliveryPlanId = 0
     if "DeliveryPlanId" in request_data:
             DeliveryPlanId = request_data["DeliveryPlanId"]
+    cnxn = pyodbc.connect(ConnectionString)
+    plannedRoute,driverRoute=ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn)
+    cnxn.close()
+    return jsonify({"plannedRoute":plannedRoute,"driverRoute":driverRoute})
 
 @route_page.route("/api/v1/driver_status", methods=["POST"])
 def DriverStatus():
