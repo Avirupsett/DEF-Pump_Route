@@ -152,7 +152,8 @@ def create_post():
             "Algorithm_1": {
                 "Description": "Routing based on Nearest Branch",
                 "Route": df.to_dict(orient="records"),
-                "Total_distance": optimal_route1[1],
+                "Total_distance": optimal_route1[1]*0.25 + optimal_route1[1],
+                "NonModified_distance": optimal_route1[1],
             },
         }
     )
@@ -214,7 +215,8 @@ def create_post():
             "Algorithm_1": {
                 "Description": "Routing based on Nearest Branch",
                 "Route": optimal_route1_df.to_dict(orient="records"),
-                "Total_distance": optimal_route1[1],
+                "Total_distance": optimal_route1[1]*0.25 + optimal_route1[1],
+                "NonModified_distance": optimal_route1[1],
             },
         },
     )

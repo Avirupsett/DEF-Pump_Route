@@ -90,7 +90,7 @@ def Route_plan_without_priority(df,startingPoint,startingPointId,startingLatitud
     date_format = "%Y-%m-%d %H:%M:%S"
     time=0
     for i in range(len(optimal_route)):
-        distance=(distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]*35)/100+distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]
+        distance=(distance_matrix_df2[optimal_route[i-1]][optimal_route[i]]*25)/100+distance_matrix_df2[optimal_route[i-1]][optimal_route[i]] # Calculate Error Percentage
         time += ((distance/speed_of_vehicle)*60)
        
         addedTime =datetime.strptime(startTime, date_format) + timedelta(minutes=time)
