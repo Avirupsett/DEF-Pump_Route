@@ -174,7 +174,7 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
             (dpd.DeliveryPlanDetailsStatusId!=3)
                 )As d
             On d.OfficeId=df.OfficeId  
-           
+           ORDER BY d.sequenceNo
         ;
                          ''',cnxn)
     
@@ -193,5 +193,6 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
     Left Join DeliveryPlanDetails ON DeliveryPlanDetails.DeliveryPlanDetailsId = DeliveryTracker.DeliveryPlanDetailsId AND DeliveryPlanDetails.DeliveryPlanId = DeliveryTracker.DeliveryPlanId
     Left Join Office ON Office.OfficeId = DeliveryPlanDetails.officeId
     WHERE
-        DeliveryTracker.DeliveryPlanId = {DeliveryPlanId}''',cnxn)
+        DeliveryTracker.DeliveryPlanId = {DeliveryPlanId}
+    Order By DeliveryTracker.locationUpdateTime''',cnxn)
     return Delivery_df.to_dict(orient="records"),driver_df.to_dict(orient="records")
