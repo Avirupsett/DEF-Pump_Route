@@ -33,6 +33,34 @@
         }
       }
     },
+    "/api/v1/driver_route": {
+      "post": {
+        "tags": [
+          "Vehicle Route Plan"
+        ],
+        "summary": "View Driver Route",
+        "requestBody": {
+          "description": "View Driver Route",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DriverRoute"
+              }
+            }
+          }
+        },
+        
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
     "/api/v1/dashboard/dropdown_list/{UserId}": {
       "get": {
         "tags": [
@@ -569,6 +597,16 @@
             "example": null
           }
         }
+      },
+      "DriverRoute": {
+        "type": "object",
+        "properties": {     
+          "DeliveryPlanId": {
+            "type": "number",
+            "format": "number",
+            "example": 1
+          }
+         }
       },
       "CustomerDetails": {
         "type": "object",

@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 from config.config import ConnectionString
 
 from controllers.Extraction.extraction import Extracting, ExtractingFromOfficeId
-from controllers.Extraction.extraExtraction import ExtractingFromDeliveryPlan
+from controllers.Extraction.extraExtraction import ExtractingDriverRouteFromDeliveryPlan, ExtractingFromDeliveryPlan
 from controllers.Dashboard.Sales.dropdown_list import dropdown_list
 from controllers.Dashboard.Sales.sales_list import sales_based_on_admin
 from controllers.Dashboard.Sales.ExistingCurrent import ExistingCurrentCustomer
@@ -154,7 +154,7 @@ def create_post():
                 "Route": df.to_dict(orient="records"),
                 "Total_distance": optimal_route1[1],
             },
-        },
+        }
     )
 
     elif Office_list and len(Office_list) > 0:
@@ -218,6 +218,18 @@ def create_post():
             },
         },
     )
+
+@route_page.route("/api/v1/driver_route", methods=["POST"])
+def DriverRoute():
+    request_data = request.get_json()
+    DeliveryPlanId = 0
+    if "DeliveryPlanId" in request_data:
+            DeliveryPlanId = request_data["DeliveryPlanId"]
+
+    cnxn = pyodbc.connect(ConnectionString)
+    plannedRoute,driverRoute=ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn)
+    cnxn.close()
+    return jsonify({"plannedRoute":plannedRoute,"driverRoute":driverRoute})
 
 
 @route_page.route("/api/v1/dashboard/dropdown_list/<string:_UserId>", methods=["GET"])
