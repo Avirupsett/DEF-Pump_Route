@@ -19,6 +19,7 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                 ''',cnxn)
     
     date_format = "%Y-%m-%d %H:%M:%S"
+    date_format2 = "%Y-%m-%dT%H:%M:%S"
  
 
     driver_assigned_df=pd.read_sql_query(f'''
@@ -26,9 +27,15 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                 d.driverName,d.licenceNo,d.contactNumber 
                                 from DeliveryPlan dp
                                 Left Join Driver d ON d.DriverId=dp.DriverId
-                                Where dp.IsDeleted=0 AND d.IsActive=1 AND (dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}')
+                                Where dp.IsDeleted=0 AND d.IsActive=1 AND 
+                                         dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' OR dp.actualReturnTime<='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}') AND
+                                         dp.planDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.planDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' )
+
                                 ORDER BY dp.expectedDeliveryDate Desc;''',cnxn)
     driver_assigned_df["assigned"]=True
+    driver_assigned_df[["planDate","expectedDeliveryDate"]]=driver_assigned_df[["planDate","expectedDeliveryDate"]].apply(pd.to_datetime)
+    driver_assigned_df["planDate"]=driver_assigned_df["planDate"].dt.strftime(date_format2)
+    driver_assigned_df["expectedDeliveryDate"]=driver_assigned_df["expectedDeliveryDate"].dt.strftime(date_format2)
     
     
     driver_not_assigned_df=driver_df[~driver_df['driverId'].isin(driver_assigned_df['driverId'])]
@@ -103,7 +110,7 @@ def ExtractingDriverHistory(driverid,cnxn):
     ''',cnxn)
         
     
-    date_format = "%Y-%m-%d %H:%M:%S"
+    date_format = "%Y-%m-%dT%H:%M:%S"
     prev_journey=[]
     
     try:
