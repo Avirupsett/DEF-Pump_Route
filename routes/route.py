@@ -6,7 +6,7 @@ import warnings
 import os
 from datetime import datetime,timedelta
 
-from controllers.Extraction.driverExtraction import ExtractingDriverStatus
+from controllers.Extraction.driverExtraction import ExtractingDriverStatus, ExtractingDriverHistory
 warnings.filterwarnings("ignore")
 from config.config import ConnectionString
 
@@ -242,10 +242,21 @@ def DriverStatus():
             DeliveryPlanId = request_data["DeliveryPlanId"]
 
     cnxn = pyodbc.connect(ConnectionString)
-    driverAssigned,driverNotAssigned=ExtractingDriverStatus(DeliveryPlanId,cnxn)
+    driverStatus=ExtractingDriverStatus(DeliveryPlanId,cnxn)
     cnxn.close()
-    return jsonify({"driverAssigned":driverAssigned,"driverNotAssigned":driverNotAssigned})
+    return jsonify({"driverStatus":driverStatus})
 
+@route_page.route("/api/v1/driver_history", methods=["POST"])
+def DriverHistory():
+    request_data = request.get_json()
+    driverId = None
+    if "DriverId" in request_data:
+            driverId = request_data["DriverId"]
+
+    cnxn = pyodbc.connect(ConnectionString)
+    driverHistory=ExtractingDriverHistory(driverId,cnxn)
+    cnxn.close()
+    return jsonify({"prevJourney":driverHistory})
 
 @route_page.route("/api/v1/dashboard/dropdown_list/<string:_UserId>", methods=["GET"])
 def dropdown(_UserId):

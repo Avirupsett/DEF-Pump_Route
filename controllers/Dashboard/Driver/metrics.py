@@ -100,7 +100,7 @@ def driver_metrics(driverid,cnxn):
             alltime_df1.sort_values(by="LocationUpdateTime",ascending=False,ignore_index=True,inplace=True)
             end_index=alltime_df1.index.get_loc(alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index[0])
             alltime_df1=alltime_df1[end_index+1:]
-            alltime_df1=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]!=4]
+            # alltime_df1=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]!=4]
             alltime_df1.reset_index(inplace=True,drop=True)
 
             plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
@@ -117,18 +117,19 @@ def driver_metrics(driverid,cnxn):
                 res = []
                 [res.append(x) for x in office_list if x not in res]
                 res.insert(0,startPoint)
-                alltime_journey+=temp_df["Distance"].sum()
+                alltime_journey+=temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum()
                 alltime_drivingTime+=temp_df[temp_df["Distance"]!=0]["Time"].sum()
                 alltime_idleTime+=temp_df[temp_df["Distance"]==0]["Time"].sum()
+                prev_distanceCovered=float(temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum())
 
                 if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
                     res.append(startPoint)
                 prev_journey.append(
                     {
-                        "distanceCovered":float(temp_df["Distance"].sum()), # Distance Covered
+                        "distanceCovered":prev_distanceCovered, # Distance Covered
                         "drivingTime":float(temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Driving Time
                         "idleTime": float(temp_df[temp_df["Distance"]==0]["Time"].sum()), # Idle Time
-                        "averageSpeed":float(temp_df["Distance"].sum()/temp_df[temp_df["Distance"]!=0]["Time"].sum()) if temp_df[temp_df["Distance"]!=0]["Time"].sum()!=0 else 0, # Average Speed
+                        "averageSpeed":float(prev_distanceCovered/temp_df[temp_df["Distance"]!=0]["Time"].sum()) if temp_df[temp_df["Distance"]!=0]["Time"].sum()!=0 else 0, # Average Speed
                         "containerSize":int(temp_df.loc[0,"ContainerSize"]), # Container Size
                         "deliveryPlanId":int(temp_df.loc[0,"DeliveryPlanId"]), # DeliveryPlan
                         "startTime":temp_df.loc[0,"LocationUpdateTime"].strftime(date_format),
@@ -199,7 +200,7 @@ def driver_metrics(driverid,cnxn):
                     totalJob=deliveryPlanDetails['ApprovedQuantity'].count() # Total Job
                     jobCompleted=driver_df1[driver_df1['DeliveryTrackerStatusId']==2][['OfficeId','DeliveredQuantity']].drop_duplicates()["DeliveredQuantity"].count() # Job Completed
 
-                    distanceCovered=driver_df1[driver_df1["Distance"]!=0]["Distance"].sum() # Distance Covered
+                    distanceCovered=driver_df1[driver_df1["Distance"]!=0]["Distance"].sum()*0.25 + driver_df1[driver_df1["Distance"]!=0]["Distance"].sum() # Distance Covered
                     drivingHours=driver_df1[driver_df1["Distance"]!=0]["Time"].sum() # Driving Hours
                     idleTime=driver_df1[driver_df1["Distance"]==0]["Time"].sum() # Idle Time
                     averageSpeed=distanceCovered/drivingHours if drivingHours!=0 else 0 # Average Speed

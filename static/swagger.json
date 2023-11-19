@@ -89,6 +89,34 @@
         }
       }
     },
+    "/api/v1/driver_history": {
+      "post": {
+        "tags": [
+          "Vehicle Route Plan"
+        ],
+        "summary": "View Driver History",
+        "requestBody": {
+          "description": "View Driver History",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DriverHistory"
+              }
+            }
+          }
+        },
+        
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
     "/api/v1/dashboard/dropdown_list/{UserId}": {
       "get": {
         "tags": [
@@ -633,6 +661,16 @@
             "type": "number",
             "format": "number",
             "example": 1
+          }
+         }
+      },
+      "DriverHistory": {
+        "type": "object",
+        "properties": {     
+          "DriverId": {
+            "type": "string",
+            "format": "string",
+            "example": "E9C62D84-57FE-4215-D69F-08DAF9596B0B"
           }
          }
       },
