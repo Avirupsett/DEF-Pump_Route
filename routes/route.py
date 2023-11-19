@@ -223,38 +223,26 @@ def create_post():
         },
     )
 
-@route_page.route("/api/v1/driver_route", methods=["POST"])
-def DriverRoute():
-    request_data = request.get_json()
-    DeliveryPlanId = 0
-    if "DeliveryPlanId" in request_data:
-            DeliveryPlanId = request_data["DeliveryPlanId"]
+@route_page.route("/api/v1/driver_route/<int:_DeliveryPlanId>", methods=["GET"])
+def DriverRoute(_DeliveryPlanId):
     cnxn = pyodbc.connect(ConnectionString)
-    plannedRoute,driverRoute=ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn)
+    plannedRoute,driverRoute=ExtractingDriverRouteFromDeliveryPlan(int(_DeliveryPlanId),cnxn)
     cnxn.close()
     return jsonify({"plannedRoute":plannedRoute,"driverRoute":driverRoute})
 
-@route_page.route("/api/v1/driver_status", methods=["POST"])
-def DriverStatus():
-    request_data = request.get_json()
-    DeliveryPlanId = 0
-    if "DeliveryPlanId" in request_data:
-            DeliveryPlanId = request_data["DeliveryPlanId"]
-
+@route_page.route("/api/v1/driver_available/<int:_DeliveryPlanId>", methods=["GET"])
+def DriverStatus(_DeliveryPlanId):
+    
     cnxn = pyodbc.connect(ConnectionString)
-    driverStatus=ExtractingDriverStatus(DeliveryPlanId,cnxn)
+    driverStatus=ExtractingDriverStatus(int(_DeliveryPlanId),cnxn)
     cnxn.close()
-    return jsonify({"driverStatus":driverStatus})
+    return jsonify({"driverAvailable":driverStatus})
 
-@route_page.route("/api/v1/driver_history", methods=["POST"])
-def DriverHistory():
-    request_data = request.get_json()
-    driverId = None
-    if "DriverId" in request_data:
-            driverId = request_data["DriverId"]
-
+@route_page.route("/api/v1/driver_history/<string:_driverId>", methods=["GET"])
+def DriverHistory(_driverId):
+ 
     cnxn = pyodbc.connect(ConnectionString)
-    driverHistory=ExtractingDriverHistory(driverId,cnxn)
+    driverHistory=ExtractingDriverHistory(_driverId,cnxn)
     cnxn.close()
     return jsonify({"prevJourney":driverHistory})
 

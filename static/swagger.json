@@ -33,23 +33,23 @@
         }
       }
     },
-    "/api/v1/driver_route": {
-      "post": {
+    "/api/v1/driver_route/{DeliveryPlanId}": {
+      "get": {
         "tags": [
           "Vehicle Route Plan"
         ],
         "summary": "View Driver Route",
-        "requestBody": {
-          "description": "View Driver Route",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DriverRoute"
-              }
+        "parameters": [
+          {
+            "name": "DeliveryPlanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
             }
           }
-        },
+        ],
         
         "responses": {
           "200": {
@@ -61,23 +61,23 @@
         }
       }
     },
-    "/api/v1/driver_status": {
-      "post": {
+    "/api/v1/driver_available/{DeliveryPlanId}": {
+      "get": {
         "tags": [
           "Vehicle Route Plan"
         ],
         "summary": "View Driver Status",
-        "requestBody": {
-          "description": "View Driver Status",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DriverRoute"
-              }
+        "parameters": [
+          {
+            "name": "DeliveryPlanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "example": 1
             }
           }
-        },
+        ],
         
         "responses": {
           "200": {
@@ -89,23 +89,23 @@
         }
       }
     },
-    "/api/v1/driver_history": {
-      "post": {
+    "/api/v1/driver_history/{DriverId}": {
+      "get": {
         "tags": [
           "Vehicle Route Plan"
         ],
         "summary": "View Driver History",
-        "requestBody": {
-          "description": "View Driver History",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DriverHistory"
-              }
+        "parameters": [
+          {
+            "name": "DriverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "E9C62D84-57FE-4215-D69F-08DAF9596B0B"
             }
           }
-        },
+        ],
         
         "responses": {
           "200": {
