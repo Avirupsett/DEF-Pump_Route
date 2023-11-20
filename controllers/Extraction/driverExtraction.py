@@ -32,10 +32,11 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                          dp.planDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.planDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' )
 
                                 ORDER BY dp.expectedDeliveryDate Desc;''',cnxn)
-    driver_assigned_df["assigned"]=True
-    driver_assigned_df[["planDate","expectedDeliveryDate"]]=driver_assigned_df[["planDate","expectedDeliveryDate"]].apply(pd.to_datetime)
-    driver_assigned_df["planDate"]=driver_assigned_df["planDate"].dt.strftime(date_format2)
-    driver_assigned_df["expectedDeliveryDate"]=driver_assigned_df["expectedDeliveryDate"].dt.strftime(date_format2)
+    if len(driver_assigned_df)>0:
+        driver_assigned_df["assigned"]=True
+        driver_assigned_df[["planDate","expectedDeliveryDate"]]=driver_assigned_df[["planDate","expectedDeliveryDate"]].apply(pd.to_datetime)
+        driver_assigned_df["planDate"]=driver_assigned_df["planDate"].dt.strftime(date_format2)
+        driver_assigned_df["expectedDeliveryDate"]=driver_assigned_df["expectedDeliveryDate"].dt.strftime(date_format2)
     
     
     driver_not_assigned_df=driver_df[~driver_df['driverId'].isin(driver_assigned_df['driverId'])]

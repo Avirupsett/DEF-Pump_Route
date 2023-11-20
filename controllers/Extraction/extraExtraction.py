@@ -180,12 +180,13 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
     
     date_format="%Y-%m-%dT%H:%M:%S"
 
-    Delivery_df[["createdOn","updatedOn","planDate","expectedDeliveryDate","deliveredAt"]]=Delivery_df[["createdOn","updatedOn","planDate","expectedDeliveryDate","deliveredAt"]].apply(pd.to_datetime)
-    Delivery_df["createdOn"]=Delivery_df["createdOn"].dt.strftime(date_format)
-    Delivery_df["updatedOn"]=Delivery_df["updatedOn"].dt.strftime(date_format)
-    Delivery_df["planDate"]=Delivery_df["planDate"].dt.strftime(date_format)
-    Delivery_df["expectedDeliveryDate"]=Delivery_df["expectedDeliveryDate"].dt.strftime(date_format)
-    Delivery_df["deliveredAt"]=Delivery_df["deliveredAt"].dt.strftime(date_format)
+    if len(Delivery_df)>0:
+        Delivery_df[["createdOn","updatedOn","planDate","expectedDeliveryDate","deliveredAt"]]=Delivery_df[["createdOn","updatedOn","planDate","expectedDeliveryDate","deliveredAt"]].apply(pd.to_datetime)
+        Delivery_df["createdOn"]=Delivery_df["createdOn"].dt.strftime(date_format)
+        Delivery_df["updatedOn"]=Delivery_df["updatedOn"].dt.strftime(date_format)
+        Delivery_df["planDate"]=Delivery_df["planDate"].dt.strftime(date_format)
+        Delivery_df["expectedDeliveryDate"]=Delivery_df["expectedDeliveryDate"].dt.strftime(date_format)
+        Delivery_df["deliveredAt"]=Delivery_df["deliveredAt"].dt.strftime(date_format)
     
     driver_df=pd.read_sql_query(f'''SELECT
         name as status,
@@ -205,7 +206,8 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
         DeliveryTracker.DeliveryPlanId = {DeliveryPlanId}
     Order By DeliveryTracker.locationUpdateTime''',cnxn)
 
-    driver_df[["locationUpdateTime"]]=driver_df[["locationUpdateTime"]].apply(pd.to_datetime)
-    driver_df["locationUpdateTime"]=driver_df["locationUpdateTime"].dt.strftime(date_format)
+    if(len(driver_df)>0):
+        driver_df[["locationUpdateTime"]]=driver_df[["locationUpdateTime"]].apply(pd.to_datetime)
+        driver_df["locationUpdateTime"]=driver_df["locationUpdateTime"].dt.strftime(date_format)
     
     return Delivery_df.to_dict(orient="records"),driver_df.to_dict(orient="records")
