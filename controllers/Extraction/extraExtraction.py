@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from controllers.Extraction.extraction import Extracting
 import warnings
 warnings.filterwarnings('ignore')
@@ -187,6 +188,7 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
         Delivery_df["planDate"]=Delivery_df["planDate"].dt.strftime(date_format)
         Delivery_df["expectedDeliveryDate"]=Delivery_df["expectedDeliveryDate"].dt.strftime(date_format)
         Delivery_df["deliveredAt"]=Delivery_df["deliveredAt"].dt.strftime(date_format)
+        Delivery_df.replace({np.nan: None}, inplace = True)
     
     driver_df=pd.read_sql_query(f'''SELECT
         name as status,
