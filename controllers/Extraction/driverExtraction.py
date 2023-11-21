@@ -37,6 +37,17 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
         driver_assigned_df[["planDate","expectedDeliveryDate"]]=driver_assigned_df[["planDate","expectedDeliveryDate"]].apply(pd.to_datetime)
         driver_assigned_df["planDate"]=driver_assigned_df["planDate"].dt.strftime(date_format2)
         driver_assigned_df["expectedDeliveryDate"]=driver_assigned_df["expectedDeliveryDate"].dt.strftime(date_format2)
+        driver_assigned_df.set_index('deliveryPlanId',inplace=True)
+        order_list=list(driver_assigned_df.index)
+        if DeliveryPlanId in order_list:
+            order_list.remove(DeliveryPlanId)
+            order_list.insert(0,DeliveryPlanId)
+            driver_assigned_df=driver_assigned_df.reindex(order_list)
+        driver_assigned_df.reset_index(inplace=True)
+   
+        check_duplicate=driver_assigned_df.duplicated(subset=['driverId']).any()
+        if check_duplicate:
+            driver_assigned_df=driver_assigned_df.drop_duplicates(subset=['driverId'], keep='first')
     
     
     driver_not_assigned_df=driver_df[~driver_df['driverId'].isin(driver_assigned_df['driverId'])]
