@@ -64,7 +64,7 @@ def driver_metrics(driverid,cnxn):
       o.OfficeAddress,
       o.Latitude As OfficeLatitude,
       o.Longitude As OfficeLongitude
-
+            
       FROM DeliveryTracker dt
       LEFT JOIN
       DeliveryPlan dp ON dt.deliveryPlanId=dp.deliveryPlanId
@@ -126,6 +126,7 @@ def driver_metrics(driverid,cnxn):
                     res.append(startPoint)
                 prev_journey.append(
                     {
+                        "planTitle":temp_df.loc[0,"PlanTitle"],
                         "distanceCovered":prev_distanceCovered, # Distance Covered
                         "drivingTime":float(temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Driving Time
                         "idleTime": float(temp_df[temp_df["Distance"]==0]["Time"].sum()), # Idle Time
@@ -159,6 +160,8 @@ def driver_metrics(driverid,cnxn):
                         dpd.DeliveredQuantity,
                         dpd.ApprovedQuantity,
                         dpd.DeliveredAt,
+                        dpd.DeliveryPlanId,
+                        dp.planTitle,
                         o.OfficeId,
                         o.OfficeName,
                         o.OfficeAddress,
@@ -166,6 +169,9 @@ def driver_metrics(driverid,cnxn):
                         o.Longitude As OfficeLongitude
 
                         FROM DeliveryPlanDetails dpd
+                                                          
+                        LEFT JOIN
+                        DeliveryPlan dp ON dp.DeliveryPlanId=dpd.DeliveryPlanId
 
                         LEFT JOIN
                         Office o ON o.OfficeId=dpd.OfficeId
@@ -181,6 +187,8 @@ def driver_metrics(driverid,cnxn):
                         if deliveryPlanDetails.loc[i,"OfficeId"] in current_trip:
                             tripMap.append({
                                 "Status":"Delivered",
+                                "deliveryPlanId":int(deliveryPlanDetails.loc[i,"DeliveryPlanId"]),
+                                "planTitle":deliveryPlanDetails.loc[i,"planTitle"],
                                 "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
                                 "Quantity":deliveryPlanDetails.loc[i,"DeliveredQuantity"],
                                 "DeliveredTime":deliveryPlanDetails.loc[i,"DeliveredAt"].strftime(date_format),
@@ -188,6 +196,8 @@ def driver_metrics(driverid,cnxn):
                         else:
                             tripMap.append({
                                     "Status":"Pending",
+                                    "deliveryPlanId":int(deliveryPlanDetails.loc[i,"DeliveryPlanId"]),
+                                    "planTitle":deliveryPlanDetails.loc[i,"planTitle"], 
                                     "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
                                     "Quantity":deliveryPlanDetails.loc[i,"ApprovedQuantity"],
                                     "DeliveredTime":None,
