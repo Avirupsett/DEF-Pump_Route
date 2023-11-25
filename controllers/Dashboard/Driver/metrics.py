@@ -76,6 +76,7 @@ def driver_metrics(driverid,cnxn):
       Office o ON o.OfficeId=dpd.OfficeId
 
        Where dt.DriverId='{driverid}' AND dp.IsDeleted=0
+       Order By dt.LocationUpdateTime
 
     ''',cnxn)
     
@@ -92,21 +93,24 @@ def driver_metrics(driverid,cnxn):
     date_format = "%Y-%m-%d %H:%M:%S"
     tripMap=[]
     prev_journey=[]
+    currentDeliveredPlanId=0
     
     try:
         if (len(driver_df1)>0):
             driver_df1.sort_values(by="LocationUpdateTime",ascending=False,ignore_index=True,inplace=True)
             alltime_df1=driver_df1.copy()
             alltime_df1.sort_values(by="LocationUpdateTime",ascending=False,ignore_index=True,inplace=True)
-            end_index=alltime_df1.index.get_loc(alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index[0])
-            alltime_df1=alltime_df1[end_index+1:]
+            end_index=alltime_df1.index.get_loc(alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==5].index[0])
+            alltime_df1=alltime_df1[end_index:]
             # alltime_df1=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]!=4]
             alltime_df1.reset_index(inplace=True,drop=True)
 
             plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
             
+            temp_index=0
+            
             for i in plan_index:
-                temp_df=alltime_df1[:i+1]
+                temp_df=alltime_df1[temp_index:i+1]
                 temp_df.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
                 temp_df[["Latitude(t+1)","Longitude(t+1)"]]=temp_df[["Latitude","Longitude"]].shift(periods=1)
                 temp_df["LocationUpdateTime(t+1)"]=temp_df["LocationUpdateTime"].shift(periods=1)
@@ -124,6 +128,25 @@ def driver_metrics(driverid,cnxn):
 
                 if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
                     res.append(startPoint)
+
+                driverTrip=alltime_df1[temp_index:i+1]
+                driverTrip=driverTrip[driverTrip["DeliveryTrackerStatusId"]==2]
+                driverTrip["Status"]="Delivered"
+                driverTrip["LocationUpdateTime"]=driverTrip["LocationUpdateTime"].dt.strftime(date_format)
+                # Rename columns
+                driverTrip.rename(columns={
+                    "DeliveryPlanId":"deliveryPlanId",
+                    "DeliveredQuantity":"Quantity",
+                    "OfficeName":"officeName",
+                    "LocationUpdateTime":"DeliveredTime",
+                    "PlanTitle":"planTitle",
+                    "OfficeAddress":"officeAddress"
+                },inplace=True)
+
+                temp_index=i
+
+                
+                
                 prev_journey.append(
                     {
                         "planTitle":temp_df.loc[0,"PlanTitle"],
@@ -135,7 +158,8 @@ def driver_metrics(driverid,cnxn):
                         "deliveryPlanId":int(temp_df.loc[0,"DeliveryPlanId"]), # DeliveryPlan
                         "startTime":temp_df.loc[0,"LocationUpdateTime"].strftime(date_format),
                         # "startPoint":temp_df.loc[0,"HubName"], # Start Point
-                        "journey":res
+                        "journey":res,
+                        "tripMap":driverTrip[["Status","deliveryPlanId","Quantity","officeName","DeliveredTime","planTitle","officeAddress"]][::-1].to_dict('records')
                     }
                 )
 
@@ -147,6 +171,7 @@ def driver_metrics(driverid,cnxn):
                 driver_df1.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
                 driver_df1=driver_df1[-start_index:]
                 if driver_df1[driver_df1["DeliveryTrackerStatusId"]!=5]["DeliveryTrackerStatusId"].any():
+                    currentDeliveredPlanId=driver_df1.loc[0,"DeliveryPlanId"]
                     driver_df1[["Latitude(t+1)","Longitude(t+1)"]]=driver_df1[["Latitude","Longitude"]].shift(periods=1)
                     driver_df1["LocationUpdateTime(t+1)"]=driver_df1["LocationUpdateTime"].shift(periods=1)
                     driver_df1["Distance"]=driver_df1.dropna(subset=["Latitude(t+1)","Longitude(t+1)","Latitude","Longitude"], how='any').apply(lambda row:haversine(row["Latitude"],row["Longitude"],row["Latitude(t+1)"],row["Longitude(t+1)"]), axis=1)
@@ -164,7 +189,7 @@ def driver_metrics(driverid,cnxn):
                         dp.planTitle,
                         o.OfficeId,
                         o.OfficeName,
-                        o.OfficeAddress,
+                        o.officeAddress,
                         o.Latitude As OfficeLatitude,
                         o.Longitude As OfficeLongitude
 
@@ -177,6 +202,7 @@ def driver_metrics(driverid,cnxn):
                         Office o ON o.OfficeId=dpd.OfficeId
                     
                         Where dpd.DeliveryPlanId={deliveryPlanId}
+                        Order By dpd.DeliveredAt
 
                         ''',cnxn)
                     
@@ -187,6 +213,7 @@ def driver_metrics(driverid,cnxn):
                         if deliveryPlanDetails.loc[i,"OfficeId"] in current_trip:
                             tripMap.append({
                                 "Status":"Delivered",
+                                "officeAddress":deliveryPlanDetails.loc[i,"officeAddress"],
                                 "deliveryPlanId":int(deliveryPlanDetails.loc[i,"DeliveryPlanId"]),
                                 "planTitle":deliveryPlanDetails.loc[i,"planTitle"],
                                 "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
@@ -196,6 +223,7 @@ def driver_metrics(driverid,cnxn):
                         else:
                             tripMap.append({
                                     "Status":"Pending",
+                                    "officeAddress":deliveryPlanDetails.loc[i,"officeAddress"],
                                     "deliveryPlanId":int(deliveryPlanDetails.loc[i,"DeliveryPlanId"]),
                                     "planTitle":deliveryPlanDetails.loc[i,"planTitle"], 
                                     "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
@@ -219,8 +247,8 @@ def driver_metrics(driverid,cnxn):
                     alltime_drivingTime+=drivingHours
                     alltime_idleTime+=idleTime
                     alltime_averageSpeed=alltime_journey/alltime_drivingTime if alltime_drivingTime!=0 else 0
-    except:
-        print("Driver Metrics Error")
+    except Exception as e:
+        print("Driver Metrics Error", e)
 
     return {
         "profile":{
@@ -242,6 +270,7 @@ def driver_metrics(driverid,cnxn):
         },
         "prevJourney":prev_journey,
         "myTrip":tripMap,
+        "currentDeliveredPlanId":int(currentDeliveredPlanId),
         "alltime":{
             "distanceCovered":float(alltime_journey),
             "drivingTime":float(alltime_drivingTime),

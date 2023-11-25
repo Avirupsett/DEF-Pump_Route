@@ -136,8 +136,9 @@ def ExtractingDriverHistory(driverid,cnxn):
             alltime_df1.reset_index(inplace=True,drop=True)
 
             plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
+            temp_index=0
             for i in plan_index:
-                temp_df=alltime_df1[:i+1]
+                temp_df=alltime_df1[temp_index:i+1]
                 temp_df.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
                 temp_df[["Latitude(t+1)","Longitude(t+1)"]]=temp_df[["Latitude","Longitude"]].shift(periods=1)
                 temp_df["LocationUpdateTime(t+1)"]=temp_df["LocationUpdateTime"].shift(periods=1)
@@ -155,6 +156,8 @@ def ExtractingDriverHistory(driverid,cnxn):
 
                 if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
                     res.append(startPoint)
+
+                temp_index=i
                 prev_journey.append(
                     {
                         "distanceCovered":distanceCovered, # Distance Covered
