@@ -157,7 +157,7 @@ def ExtractingDriverHistory(driverid,cnxn):
                 if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
                     res.append(startPoint)
 
-                temp_index=i
+                temp_index=i+1
                 prev_journey.append(
                     {
                         "distanceCovered":distanceCovered, # Distance Covered

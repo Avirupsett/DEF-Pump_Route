@@ -143,7 +143,7 @@ def driver_metrics(driverid,cnxn):
                     "OfficeAddress":"officeAddress"
                 },inplace=True)
 
-                temp_index=i
+                temp_index=i+1
 
                 
                 
