@@ -15,6 +15,7 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                 Select 
                                 dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.planDate
                                 from DeliveryPlan dp
+                                
                                 Where dp.DeliveryPlanId={DeliveryPlanId}
                                 ''',cnxn)
     
@@ -23,9 +24,10 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
  
 
     driver_assigned_df=pd.read_sql_query(f'''
-                                Select dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.planDate,
+                                Select dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.planDate,dp.DeliveryPlanStatusId,dps.DeliveryPlanStatus,
                                 d.driverName,d.licenceNo,d.contactNumber 
                                 from DeliveryPlan dp
+                                         LEFT JOIN DeliveryPlanStatusMaster dps ON dps.DeliveryPlanStatusId=dp.DeliveryPlanStatusId
                                 Left Join Driver d ON d.DriverId=dp.DriverId
                                 Where dp.IsDeleted=0 AND d.IsActive=1 AND 
                                          dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' OR dp.actualReturnTime<='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}') AND
