@@ -6,14 +6,16 @@ from math import radians, sin, cos, sqrt, atan2
 def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     driver_df=pd.read_sql_query(f'''
                                 Select 
-                                d.driverName,d.licenceNo,d.contactNumber,d.driverId
+                                d.driverName,d.licenceNo,d.contactNumber,d.driverId,dp.DeliveryPlanStatusId,dps.DeliveryPlanStatus
                                 from  Driver d 
+                                LEFT JOIN (Select * from deliveryPlan where DeliveryPlanStatusId!=6) dp ON dp.driverId=d.driverId
+                                LEFT JOIN DeliveryPlanStatusMaster dps ON dps.DeliveryPlanStatusId=dp.DeliveryPlanStatusId
                                 Where d.IsActive=1
                                 ''',cnxn)
     
     delivery_df=pd.read_sql_query(f'''
                                 Select 
-                                dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.planDate
+                                dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.expectedReturnTime,dp.planDate
                                 from DeliveryPlan dp
                                 
                                 Where dp.DeliveryPlanId={DeliveryPlanId}
@@ -30,8 +32,8 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                          LEFT JOIN DeliveryPlanStatusMaster dps ON dps.DeliveryPlanStatusId=dp.DeliveryPlanStatusId
                                 Left Join Driver d ON d.DriverId=dp.DriverId
                                 Where dp.IsDeleted=0 AND d.IsActive=1 AND 
-                                         dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' OR dp.actualReturnTime<='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}') AND
-                                         dp.planDate >='{datetime.strftime(delivery_df['planDate'].iloc[0],date_format)}' AND (dp.planDate <='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0]+timedelta(seconds=1),date_format)}' )
+                                         dp.expectedReturnTime >='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0],date_format)}' AND (dp.expectedReturnTime <='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}' OR dp.actualReturnTime<='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}') AND
+                                         dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0],date_format)}' AND (dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}' )
 
                                 ORDER BY dp.expectedDeliveryDate Desc;''',cnxn)
     if len(driver_assigned_df)>0:
@@ -41,6 +43,7 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
         driver_assigned_df["expectedDeliveryDate"]=driver_assigned_df["expectedDeliveryDate"].dt.strftime(date_format2)
         driver_assigned_df.set_index('deliveryPlanId',inplace=True)
         order_list=list(driver_assigned_df.index)
+        # LOGIC to remove 2 or more delivery plan with same driver at same time
         if DeliveryPlanId in order_list:
             order_list.remove(DeliveryPlanId)
             order_list.insert(0,DeliveryPlanId)
