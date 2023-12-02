@@ -6,10 +6,9 @@ from math import radians, sin, cos, sqrt, atan2
 def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     driver_df=pd.read_sql_query(f'''
                                 Select 
-                                d.driverName,d.licenceNo,d.contactNumber,d.driverId,dp.DeliveryPlanStatusId,dps.DeliveryPlanStatus
+                                d.driverName,d.licenceNo,d.contactNumber,d.driverId
                                 from  Driver d 
-                                LEFT JOIN (Select * from deliveryPlan where DeliveryPlanStatusId!=6) dp ON dp.driverId=d.driverId
-                                LEFT JOIN DeliveryPlanStatusMaster dps ON dps.DeliveryPlanStatusId=dp.DeliveryPlanStatusId
+                                
                                 Where d.IsActive=1
                                 ''',cnxn)
     
