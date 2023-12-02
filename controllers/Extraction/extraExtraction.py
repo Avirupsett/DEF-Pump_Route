@@ -142,6 +142,7 @@ def ExtractingDriverRouteFromDeliveryPlan(DeliveryPlanId,cnxn):
             d.deliveryPlanId,
             m.masterOfficeId,
             m.OfficeName As masterOfficeName,
+            m.officeaddress,
             d.hubName,
             d.plannedQuantity,d.currentQuantity,d.availableQuantity,d.productId,d.deliveryLimit,
                                 d.planDate,d.expectedDeliveryDate,d.deliveryPlanStatusId,d.createdBy,d.updatedBy,d.createdOn,d.updatedOn,

@@ -234,9 +234,9 @@ def DriverRoute(_DeliveryPlanId):
 def DriverStatus(_DeliveryPlanId):
     
     cnxn = pyodbc.connect(ConnectionString)
-    driverStatus=ExtractingDriverStatus(int(_DeliveryPlanId),cnxn)
+    driverStatus,DeliveryStatus=ExtractingDriverStatus(int(_DeliveryPlanId),cnxn)
     cnxn.close()
-    return jsonify({"driverAvailable":driverStatus})
+    return jsonify({"driverAvailable":driverStatus,"deliveryPlanStatus":DeliveryStatus})
 
 @route_page.route("/api/v1/driver_history/<string:_driverId>", methods=["GET"])
 def DriverHistory(_driverId):

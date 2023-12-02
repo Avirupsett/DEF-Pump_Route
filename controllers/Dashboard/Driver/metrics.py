@@ -100,68 +100,69 @@ def driver_metrics(driverid,cnxn):
             driver_df1.sort_values(by="LocationUpdateTime",ascending=False,ignore_index=True,inplace=True)
             alltime_df1=driver_df1.copy()
             alltime_df1.sort_values(by="LocationUpdateTime",ascending=False,ignore_index=True,inplace=True)
-            end_index=alltime_df1.index.get_loc(alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==5].index[0])
-            alltime_df1=alltime_df1[end_index:]
-            # alltime_df1=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]!=4]
-            alltime_df1.reset_index(inplace=True,drop=True)
+            if alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==5]["DeliveryTrackerStatusId"].any():
+                end_index=alltime_df1.index.get_loc(alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==5].index[0])
+                alltime_df1=alltime_df1[end_index:]
+                # alltime_df1=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]!=4]
+                alltime_df1.reset_index(inplace=True,drop=True)
 
-            plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
-            
-            temp_index=0
-            
-            for i in plan_index:
-                temp_df=alltime_df1[temp_index:i+1]
-                temp_df.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
-                temp_df[["Latitude(t+1)","Longitude(t+1)"]]=temp_df[["Latitude","Longitude"]].shift(periods=1)
-                temp_df["LocationUpdateTime(t+1)"]=temp_df["LocationUpdateTime"].shift(periods=1)
-                temp_df["Distance"]=temp_df.dropna(subset=["Latitude(t+1)","Longitude(t+1)","Latitude","Longitude"], how='any').apply(lambda row:haversine(row["Latitude"],row["Longitude"],row["Latitude(t+1)"],row["Longitude(t+1)"]), axis=1)
-                temp_df["Time"]=temp_df.apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
-                startPoint=temp_df.loc[0,"HubName"] # Start Point
-                office_list=temp_df[alltime_df1["DeliveryTrackerStatusId"]==2]["OfficeName"].dropna().tolist()
-                res = []
-                [res.append(x) for x in office_list if x not in res]
-                res.insert(0,startPoint)
-                alltime_journey+=temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum()
-                alltime_drivingTime+=temp_df[temp_df["Distance"]!=0]["Time"].sum()
-                alltime_idleTime+=temp_df[temp_df["Distance"]==0]["Time"].sum()
-                prev_distanceCovered=float(temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum())
+                plan_index=alltime_df1[alltime_df1["DeliveryTrackerStatusId"]==1].index
+                
+                temp_index=0
+                
+                for i in plan_index:
+                    temp_df=alltime_df1[temp_index:i+1]
+                    temp_df.sort_values(by="LocationUpdateTime",ascending=True,ignore_index=True,inplace=True)
+                    temp_df[["Latitude(t+1)","Longitude(t+1)"]]=temp_df[["Latitude","Longitude"]].shift(periods=1)
+                    temp_df["LocationUpdateTime(t+1)"]=temp_df["LocationUpdateTime"].shift(periods=1)
+                    temp_df["Distance"]=temp_df.dropna(subset=["Latitude(t+1)","Longitude(t+1)","Latitude","Longitude"], how='any').apply(lambda row:haversine(row["Latitude"],row["Longitude"],row["Latitude(t+1)"],row["Longitude(t+1)"]), axis=1)
+                    temp_df["Time"]=temp_df.apply(lambda row:calculate_time_difference(row["LocationUpdateTime(t+1)"],row["LocationUpdateTime"]), axis=1)
+                    startPoint=temp_df.loc[0,"HubName"] # Start Point
+                    office_list=temp_df[alltime_df1["DeliveryTrackerStatusId"]==2]["OfficeName"].dropna().tolist()
+                    res = []
+                    [res.append(x) for x in office_list if x not in res]
+                    res.insert(0,startPoint)
+                    alltime_journey+=temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum()
+                    alltime_drivingTime+=temp_df[temp_df["Distance"]!=0]["Time"].sum()
+                    alltime_idleTime+=temp_df[temp_df["Distance"]==0]["Time"].sum()
+                    prev_distanceCovered=float(temp_df["Distance"].sum()*0.25+temp_df["Distance"].sum())
 
-                if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
-                    res.append(startPoint)
+                    if temp_df.loc[0,"DeliveryPlanTypeId"]==1:
+                        res.append(startPoint)
 
-                driverTrip=alltime_df1[temp_index:i+1]
-                driverTrip=driverTrip[driverTrip["DeliveryTrackerStatusId"]==2]
-                driverTrip["Status"]="Delivered"
-                driverTrip["LocationUpdateTime"]=driverTrip["LocationUpdateTime"].dt.strftime(date_format)
-                # Rename columns
-                driverTrip.rename(columns={
-                    "DeliveryPlanId":"deliveryPlanId",
-                    "DeliveredQuantity":"Quantity",
-                    "OfficeName":"officeName",
-                    "LocationUpdateTime":"DeliveredTime",
-                    "PlanTitle":"planTitle",
-                    "OfficeAddress":"officeAddress"
-                },inplace=True)
+                    driverTrip=alltime_df1[temp_index:i+1]
+                    driverTrip=driverTrip[driverTrip["DeliveryTrackerStatusId"]==2]
+                    driverTrip["Status"]="Delivered"
+                    driverTrip["LocationUpdateTime"]=driverTrip["LocationUpdateTime"].dt.strftime(date_format)
+                    # Rename columns
+                    driverTrip.rename(columns={
+                        "DeliveryPlanId":"deliveryPlanId",
+                        "DeliveredQuantity":"Quantity",
+                        "OfficeName":"officeName",
+                        "LocationUpdateTime":"DeliveredTime",
+                        "PlanTitle":"planTitle",
+                        "OfficeAddress":"officeAddress"
+                    },inplace=True)
 
-                temp_index=i+1
+                    temp_index=i+1
 
                 
                 
-                prev_journey.append(
-                    {
-                        "planTitle":temp_df.loc[0,"PlanTitle"],
-                        "distanceCovered":prev_distanceCovered, # Distance Covered
-                        "drivingTime":float(temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Driving Time
-                        "idleTime": float(temp_df[temp_df["Distance"]==0]["Time"].sum()), # Idle Time
-                        "averageSpeed":float(prev_distanceCovered/temp_df[temp_df["Distance"]!=0]["Time"].sum()) if temp_df[temp_df["Distance"]!=0]["Time"].sum()!=0 else 0, # Average Speed
-                        "containerSize":int(temp_df.loc[0,"ContainerSize"]), # Container Size
-                        "deliveryPlanId":int(temp_df.loc[0,"DeliveryPlanId"]), # DeliveryPlan
-                        "startTime":temp_df.loc[0,"LocationUpdateTime"].strftime(date_format),
-                        # "startPoint":temp_df.loc[0,"HubName"], # Start Point
-                        "journey":res,
-                        "tripMap":driverTrip[["Status","deliveryPlanId","Quantity","officeName","DeliveredTime","planTitle","officeAddress"]][::-1].to_dict('records')
-                    }
-                )
+                    prev_journey.append(
+                        {
+                            "planTitle":temp_df.loc[0,"PlanTitle"],
+                            "distanceCovered":prev_distanceCovered, # Distance Covered
+                            "drivingTime":float(temp_df[temp_df["Distance"]!=0]["Time"].sum()), # Driving Time
+                            "idleTime": float(temp_df[temp_df["Distance"]==0]["Time"].sum()), # Idle Time
+                            "averageSpeed":float(prev_distanceCovered/temp_df[temp_df["Distance"]!=0]["Time"].sum()) if temp_df[temp_df["Distance"]!=0]["Time"].sum()!=0 else 0, # Average Speed
+                            "containerSize":int(temp_df.loc[0,"ContainerSize"]), # Container Size
+                            "deliveryPlanId":int(temp_df.loc[0,"DeliveryPlanId"]), # DeliveryPlan
+                            "startTime":temp_df.loc[0,"LocationUpdateTime"].strftime(date_format),
+                            # "startPoint":temp_df.loc[0,"HubName"], # Start Point
+                            "journey":res,
+                            "tripMap":driverTrip[["Status","deliveryPlanId","Quantity","officeName","DeliveredTime","planTitle","officeAddress"]][::-1].to_dict('records')
+                        }
+                    )
 
             driver_df1=driver_df1[driver_df1["DeliveryPlanId"]==driver_df1.loc[0,"DeliveryPlanId"]]
             alltime_averageSpeed=alltime_journey/alltime_drivingTime if alltime_drivingTime>0 else 0

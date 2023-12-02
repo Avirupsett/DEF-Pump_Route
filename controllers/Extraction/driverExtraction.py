@@ -14,12 +14,13 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     
     delivery_df=pd.read_sql_query(f'''
                                 Select 
-                                dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.expectedReturnTime,dp.planDate
+                                dp.driverId,dp.deliveryPlanId,dp.expectedDeliveryDate,dp.expectedReturnTime,dp.planDate,dp.DeliveryPlanStatusId
                                 from DeliveryPlan dp
                                 
                                 Where dp.DeliveryPlanId={DeliveryPlanId}
                                 ''',cnxn)
     
+
     date_format = "%Y-%m-%d %H:%M:%S"
     date_format2 = "%Y-%m-%dT%H:%M:%S"
  
@@ -30,7 +31,7 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
                                 from DeliveryPlan dp
                                          LEFT JOIN DeliveryPlanStatusMaster dps ON dps.DeliveryPlanStatusId=dp.DeliveryPlanStatusId
                                 Left Join Driver d ON d.DriverId=dp.DriverId
-                                Where dp.IsDeleted=0 AND d.IsActive=1 AND 
+                                Where dp.IsDeleted=0 AND d.IsActive=1 AND dp.deliveryPlanStatusId!=7 AND
                                          dp.expectedReturnTime >='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0],date_format)}' AND (dp.expectedReturnTime <='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}' OR dp.actualReturnTime<='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}') AND
                                          dp.expectedDeliveryDate >='{datetime.strftime(delivery_df['expectedDeliveryDate'].iloc[0],date_format)}' AND (dp.expectedDeliveryDate <='{datetime.strftime(delivery_df['expectedReturnTime'].iloc[0]+timedelta(seconds=1),date_format)}' )
 
@@ -60,7 +61,7 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     driver_status=pd.concat([driver_assigned_df,driver_not_assigned_df])
     driver_status.replace({np.nan: None}, inplace = True)
     
-    return driver_status.to_dict('records')
+    return driver_status.to_dict('records'),delivery_df.to_dict('records')
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371  # Earth radius in kilometers
