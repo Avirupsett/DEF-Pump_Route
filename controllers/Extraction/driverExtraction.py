@@ -3,6 +3,53 @@ import pandas as pd
 from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 
+def RScore(x,p,d):
+    if x <= d[p][0.25]:
+        return 1
+    elif x <= d[p][0.50]:
+        return 2
+    elif x <= d[p][0.75]:
+        return 3
+    else:
+        return 4
+
+def FMScore(x,p,d):
+    if x <= d[p][0.25]:
+        return 4
+    elif x <= d[p][0.50]:
+        return 3
+    elif x <= d[p][0.75]:
+        return 2
+    else:
+        return 1
+
+def driverRecommendation(cnxn,DeliveryPlanId):
+    driver_df=pd.read_sql_query('Select dp.deliveryPlanId,dp.driverId,dpd.officeId,dp.deliveryPlanStatusId,dp.expectedDeliveryDate,dp.expectedReturnTime,dp.actualReturnTime from DeliveryPlan dp \
+Left Join DeliveryPlanDetails dpd on dp.deliveryPlanId=dpd.deliveryPlanId \
+Where dp.isDeleted=0',cnxn)
+    office_list=driver_df[driver_df["deliveryPlanId"]==DeliveryPlanId]["officeId"].to_list()
+
+    time_difference=driver_df[['deliveryPlanId','driverId','expectedReturnTime','actualReturnTime']].dropna().drop_duplicates().reset_index(drop=True)
+    time_difference['T_difference']=driver_df['expectedReturnTime']-driver_df['actualReturnTime']
+    time_difference=time_difference.groupby('driverId').agg({'T_difference':lambda x:x.sum()}).reset_index()
+    time_difference['T_difference']=time_difference['T_difference'].values.astype(int)/ 10**9
+
+    officeCount=driver_df[(driver_df["deliveryPlanStatusId"]>3) & (driver_df["deliveryPlanStatusId"]<7)].groupby('driverId').agg({'officeId':lambda x :len([i for i in x if i in office_list])}).reset_index()
+
+    rfmTable=pd.merge(officeCount,time_difference,on='driverId',how='outer')
+
+    quantiles = rfmTable.quantile(q=[0.25,0.5,0.75])
+    quantiles = quantiles.to_dict()
+
+    segmented_rfm = rfmTable
+    segmented_rfm['office_count'] = segmented_rfm['officeId'].apply(RScore, args=('officeId',quantiles,))
+    segmented_rfm['on_time'] = segmented_rfm['T_difference'].apply(FMScore, args=('T_difference',quantiles))
+    segmented_rfm['RFMScore'] = segmented_rfm.office_count.map(str) + segmented_rfm.on_time.map(str)
+    segmented_rfm['RFMScore']=segmented_rfm['RFMScore'].values.astype(int)
+    segmented_rfm['recommendation']=True
+
+    return segmented_rfm
+    
 def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     driver_df=pd.read_sql_query(f'''
                                 Select 
@@ -57,9 +104,14 @@ def ExtractingDriverStatus(DeliveryPlanId,cnxn):
     
     driver_not_assigned_df=driver_df[~driver_df['driverId'].isin(driver_assigned_df['driverId'])]
     driver_not_assigned_df["assigned"]=False
+    recommended_df=driverRecommendation(cnxn,DeliveryPlanId)
+    driver_not_assigned_df=driver_not_assigned_df.merge(recommended_df,how='left',on='driverId')
 
     driver_status=pd.concat([driver_assigned_df,driver_not_assigned_df])
     driver_status.replace({np.nan: None}, inplace = True)
+    driver_status.sort_values(by=['RFMScore'],inplace=True,ascending=False)
+    driver_status.reset_index(drop=True,inplace=True)
+    driver_status.loc[2:,'recommendation']=False
     
     return driver_status.to_dict('records'),delivery_df.to_dict('records')
 
