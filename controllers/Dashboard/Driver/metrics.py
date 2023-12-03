@@ -185,8 +185,10 @@ def driver_metrics(driverid,cnxn):
                         SELECT
                         dpd.DeliveredQuantity,
                         dpd.ApprovedQuantity,
+                        dpd.PlannedQuantity,
                         dpd.DeliveredAt,
                         dpd.DeliveryPlanId,
+                        dpd.ExpectedDeliveryTime,
                         dp.planTitle,
                         o.OfficeId,
                         o.OfficeName,
@@ -202,7 +204,8 @@ def driver_metrics(driverid,cnxn):
                         LEFT JOIN
                         Office o ON o.OfficeId=dpd.OfficeId
                     
-                        Where dpd.DeliveryPlanId={deliveryPlanId}
+                        Where dpd.DeliveryPlanId={deliveryPlanId} AND
+                        dpd.DeliveryPlanDetailsStatusId!=3
                         Order By dpd.DeliveredAt
 
                         ''',cnxn)
@@ -219,7 +222,10 @@ def driver_metrics(driverid,cnxn):
                                 "planTitle":deliveryPlanDetails.loc[i,"planTitle"],
                                 "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
                                 "Quantity":deliveryPlanDetails.loc[i,"DeliveredQuantity"],
+                                "approvedQuantity":deliveryPlanDetails.loc[i,"ApprovedQuantity"],
+                                "plannedQuantity":deliveryPlanDetails.loc[i,"PlannedQuantity"],
                                 "DeliveredTime":deliveryPlanDetails.loc[i,"DeliveredAt"].strftime(date_format),
+                                "expectedDeliveryTime":deliveryPlanDetails.loc[i,"ExpectedDeliveryTime"].strftime(date_format),
                             })
                         else:
                             tripMap.append({
@@ -230,6 +236,9 @@ def driver_metrics(driverid,cnxn):
                                     "officeName":deliveryPlanDetails.loc[i,"OfficeName"],
                                     "Quantity":deliveryPlanDetails.loc[i,"ApprovedQuantity"],
                                     "DeliveredTime":None,
+                                    "approvedQuantity":deliveryPlanDetails.loc[i,"ApprovedQuantity"],
+                                    "plannedQuantity":deliveryPlanDetails.loc[i,"PlannedQuantity"],
+                                    "expectedDeliveryTime":deliveryPlanDetails.loc[i,"ExpectedDeliveryTime"].strftime(date_format),
                                 })
 
                     
