@@ -34,7 +34,7 @@ SELECT
         gm.totalCapacity,
         s.avgSales
     FROM
-        (Select * from Office Where IsActive=1) o
+        (Select * from Office Where IsActive=1 AND Longitude!='' AND Latitude!='') o
     LEFT JOIN
         Office m ON m.OfficeId = o.masterOfficeId
     LEFT JOIN
@@ -88,7 +88,7 @@ su.OfficeId
         on dp.DeliveryPlanId=dpd.DeliveryPlanId
 
         WHERE
-        dp.ProductId = {Product_Type}
+        dp.ProductId = {Product_Type}  
         AND ( dp.DeliveryPlanStatusId <= 6 AND (dpd.ReceivedQuantity=0 OR dpd.ReceivedQuantity=NULL))
         AND ( dpd.DeliveryPlanDetailsStatusId!=3)
         )As d
@@ -143,7 +143,7 @@ def ExtractingFromOfficeId( Product_Type, OfficeList,cnxn,No_of_days_for_deliver
     m.masterOfficeId,
     m.OfficeName As masterOfficeName
 FROM
-    (Select * from Office Where IsActive=1) o
+    (Select * from Office Where IsActive=1 AND Longitude!='' AND Latitude!='') o
 LEFT JOIN
         Office m ON m.OfficeId = o.masterOfficeId
 LEFT JOIN
